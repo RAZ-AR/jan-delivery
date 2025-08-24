@@ -1,0 +1,19 @@
+# General
+.DS_Store
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Env and secrets
+.env
+.env.*
+*.env
+server.log
+
+# Service account keys (keep out of Git)
+jan-deliver-*.json
+
+# Build artifacts
+dist/
+build/
+

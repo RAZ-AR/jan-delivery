@@ -1,0 +1,23 @@
+# Render Quickstart
+
+- Repo: push to GitHub on branch `main`.
+- Render Blueprint: use `render.yaml` at repo root (New → Blueprint → pick repo → Create Resources).
+- Services created:
+  - `jan-delivery-backend` (Node, rootDir=backend)
+  - `jan-delivery-frontend` (Static Site, publish `frontend/`)
+- Backend env vars:
+  - `NODE_ENV=production`, `PORT=3000`
+  - `TELEGRAM_BOT_TOKEN=...`
+  - `TELEGRAM_WEBHOOK_URL=https://<backend>/`
+  - `WEB_APP_URL=https://<frontend>/`
+  - `GOOGLE_SHEETS_ID=...`
+  - `GOOGLE_SERVICE_ACCOUNT_EMAIL=...`
+  - `GOOGLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----`
+  - `OPENROUTE_API_KEY=...`
+- Frontend:
+  - Edit `frontend/index.html` meta `<meta name="jan-api-base" content="https://<backend>/">`
+  - Or keep default if backend host matches.
+- Test:
+  - Backend: `GET https://<backend>/health`
+  - Mini App: set BotFather Web App URL to `https://<frontend>/`
+  - Webhook is auto set on backend start if `TELEGRAM_WEBHOOK_URL` is set.

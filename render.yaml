@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: jan-delivery-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node src/app.js
+    rootDir: backend
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      # Telegram
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_WEBHOOK_URL
+        sync: false
+      - key: TELEGRAM_BOT_USERNAME
+        sync: false
+      # Google Sheets
+      - key: GOOGLE_SHEETS_ID
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_EMAIL
+        sync: false
+      - key: GOOGLE_PRIVATE_KEY
+        sync: false
+      # OpenRouteService
+      - key: OPENROUTE_API_KEY
+        sync: false
+      # Frontend URL (for bot button)
+      - key: WEB_APP_URL
+        sync: false
+
+  - type: static
+    name: jan-delivery-frontend
+    staticPublishPath: frontend
+    buildCommand: "echo 'Static frontend — no build'"
+    envVars:
+      - key: NODE_VERSION
+        value: 18
