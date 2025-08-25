@@ -13,6 +13,11 @@ class GoogleSheetsService {
       return;
     }
 
+    if (!process.env.GOOGLE_SHEETS_ID) {
+      console.warn('⚠️ GOOGLE_SHEETS_ID не установлен');
+      return;
+    }
+
     try {
       const auth = new google.auth.GoogleAuth({
         credentials: {

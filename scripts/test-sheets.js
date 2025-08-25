@@ -5,8 +5,8 @@
  * Использование: node scripts/test-sheets.js
  */
 
-require('dotenv').config();
-const { google } = require('googleapis');
+require('dotenv').config({ path: '.env' });
+const { google } = require('../backend/node_modules/googleapis');
 
 class SheetsTestRunner {
   constructor() {
