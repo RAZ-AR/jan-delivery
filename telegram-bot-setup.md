@@ -25,7 +25,7 @@ Bot Settings → Menu Button → Configure Menu Button
 
 **Введите:**
 - **Button text**: `🍽️ Открыть меню`
-- **Web App URL**: `https://YOUR_USERNAME.github.io/jan-delivery/`
+- **Web App URL**: `https://raz-ar.github.io/jan-delivery/`
 
 ### 3. Настроить описание бота
 ```

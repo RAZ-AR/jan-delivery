@@ -8,7 +8,7 @@
 # 2. Скопируйте URL репозитория
 # 3. Выполните команды:
 
-git remote add origin https://github.com/YOUR_USERNAME/jan-delivery.git
+git remote add origin https://github.com/RAZ-AR/jan-delivery.git
 git push -u origin main
 ```
 
@@ -32,7 +32,7 @@ PORT=3000
 TELEGRAM_BOT_TOKEN=7744854206:AAHI8khkC3IvQhI_fQJBZaFMteBI6WlK9cA
 TELEGRAM_WEBHOOK_URL=https://jan-delivery-backend.onrender.com
 TELEGRAM_BOT_USERNAME=Jan_delivery_bot
-WEB_APP_URL=https://YOUR_USERNAME.github.io/jan-delivery
+WEB_APP_URL=https://raz-ar.github.io/jan-delivery
 GOOGLE_SHEETS_ID=1TOHGRsYeoG0oo2ywJ2G9DJhb7mmcSxJvLBsiEiMIYIs
 GOOGLE_SERVICE_ACCOUNT_EMAIL=jan-delivery-bot@jan-deliver.iam.gserviceaccount.com
 GOOGLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----
@@ -76,7 +76,7 @@ OPENROUTE_API_KEY=eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjM2MGYxZj
 3. Workflow уже настроен в `.github/workflows/deploy-frontend.yml`
 4. После push на main ветку автоматически запустится деплой
 
-### URL будет: `https://YOUR_USERNAME.github.io/jan-delivery/`
+### URL будет: `https://raz-ar.github.io/jan-delivery/`
 
 ## 4. 🤖 Настройка Telegram Bot
 
@@ -85,7 +85,7 @@ OPENROUTE_API_KEY=eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjM2MGYxZj
 /mybots
 Выбрать: Jan_delivery_bot
 Bot Settings → Menu Button → Configure Menu Button
-Web App URL: https://YOUR_USERNAME.github.io/jan-delivery/
+Web App URL: https://raz-ar.github.io/jan-delivery/
 ```
 
 ### Альтернативно через команды:
@@ -93,7 +93,7 @@ Web App URL: https://YOUR_USERNAME.github.io/jan-delivery/
 /setmenubutton
 @Jan_delivery_bot
 🍽️ Открыть меню
-https://YOUR_USERNAME.github.io/jan-delivery/
+https://raz-ar.github.io/jan-delivery/
 ```
 
 ## 5. 🔧 Обновление URL в коде
@@ -102,7 +102,7 @@ https://YOUR_USERNAME.github.io/jan-delivery/
 
 **В .env на Render.com:**
 ```
-WEB_APP_URL=https://YOUR_USERNAME.github.io/jan-delivery
+WEB_APP_URL=https://raz-ar.github.io/jan-delivery
 TELEGRAM_WEBHOOK_URL=https://jan-delivery-backend.onrender.com
 ```
 
@@ -115,7 +115,7 @@ TELEGRAM_WEBHOOK_URL=https://jan-delivery-backend.onrender.com
 
 1. **Backend**: https://jan-delivery-backend.onrender.com/health
 2. **Menu API**: https://jan-delivery-backend.onrender.com/api/menu  
-3. **Frontend**: https://YOUR_USERNAME.github.io/jan-delivery/
+3. **Frontend**: https://raz-ar.github.io/jan-delivery/
 4. **Telegram Bot**: найти @Jan_delivery_bot и нажать Menu Button
 
 ## 7. 🚀 Финальные шаги
