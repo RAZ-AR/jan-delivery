@@ -33,7 +33,7 @@ Menu Button
 Configure Menu Button
 ```
 
-**Введите текст кнопки:**
+**Введите текст кнопки (когда BotFather спросит "Send me the title..."):**
 ```
 🍽️ Открыть меню
 ```
@@ -55,7 +55,7 @@ https://raz-ar.github.io/jan-delivery/
 
 **Выберите**: `@Jan_delivery_bot`
 
-**Вставьте описание:**
+**Вставьте описание на русском:**
 ```
 🍕 JAN Delivery - заказ вкусной еды с доставкой прямо в Telegram!
 
@@ -73,6 +73,31 @@ https://raz-ar.github.io/jan-delivery/
 👆 Нажмите кнопку "Меню" для заказа!
 ```
 
+**Затем добавьте описание на английском:**
+```
+/setdescription
+```
+**Выберите**: `@Jan_delivery_bot`
+**Выберите язык**: `English`
+
+**Вставьте английское описание:**
+```
+🍕 JAN Delivery - delicious food delivery straight in Telegram!
+
+🔥 Fresh charcoal grilled kebab
+🥙 Tasty lula-kebab
+🍲 Homemade salads and appetizers  
+🍺 Drinks and sauces
+
+✨ Features:
+• Convenient Mini App ordering
+• Fast city delivery
+• Cash or card payment
+• Order status tracking
+
+👆 Press "Menu" button to order!
+```
+
 ---
 
 ## ⚡ 3. Настройка команд бота
@@ -83,7 +108,7 @@ https://raz-ar.github.io/jan-delivery/
 
 **Выберите**: `@Jan_delivery_bot`
 
-**Вставьте список команд:**
+**Вставьте список команд на русском:**
 ```
 start - 🚀 Запуск бота и главное меню
 menu - 🍽️ Открыть меню для заказа  
@@ -91,6 +116,23 @@ orders - 📦 Мои заказы и история
 cart - 🛒 Моя корзина
 help - ❓ Помощь и контакты
 status - 📊 Статус доставки
+```
+
+**Затем добавьте команды на английском:**
+```
+/setcommands
+```
+**Выберите**: `@Jan_delivery_bot`
+**Выберите язык**: `English`
+
+**Вставьте команды на английском:**
+```
+start - 🚀 Start bot and main menu
+menu - 🍽️ Open menu for ordering
+orders - 📦 My orders and history  
+cart - 🛒 My shopping cart
+help - ❓ Help and contacts
+status - 📊 Delivery status
 ```
 
 ---
@@ -147,11 +189,25 @@ Disable
 /setabouttext
 ```
 **Выберите**: `@Jan_delivery_bot`
+**На русском:**
 ```
 Доставка вкусной еды 🍕
 Рабочие часы: 10:00 - 22:00
 Время доставки: 30-60 минут
 Минимальный заказ: 3000 RSD
+```
+
+**Затем на английском:**
+```
+/setabouttext
+```
+**Выберите**: `@Jan_delivery_bot`
+**Выберите язык**: `English`
+```
+Delicious food delivery 🍕
+Working hours: 10:00 - 22:00
+Delivery time: 30-60 minutes
+Minimum order: 3000 RSD
 ```
 
 ---
