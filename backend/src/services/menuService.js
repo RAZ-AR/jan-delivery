@@ -50,7 +50,7 @@ class MenuService {
           price: parseFloat(priceRaw) || 0,
           category: String(category || ''),
           image: String(image || ''),
-          available: String(availableVal).toLowerCase() === 'true' || String(availableVal) === '1',
+          available: !availableVal || String(availableVal).toLowerCase() === 'true' || String(availableVal) === '1' || String(availableVal).toLowerCase() === 'да',
           ingredients: ingredientsStr ? String(ingredientsStr).split(',').map(i => i.trim()).filter(Boolean) : [],
           weight: String(weight || ''),
           calories: parseInt(caloriesRaw) || 0

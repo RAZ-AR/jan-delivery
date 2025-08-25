@@ -4,7 +4,9 @@ const menuController = {
   // Получить все блюда
   async getMenu(req, res) {
     try {
-      const menu = await menuService.getAllItems();
+      const allItems = await menuService.getAllItems();
+      // Фильтруем только доступные блюда с названиями
+      const menu = allItems.filter(item => item.available && item.name && item.name.trim() !== '');
       res.json({
         success: true,
         data: menu
