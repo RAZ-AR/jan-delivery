@@ -84,6 +84,28 @@ body {
   font-size: 20px;
   font-weight: 700;
   color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-content h1 .logo {
+  height: 32px;
+  width: auto;
+  max-width: 32px;
+  object-fit: contain;
+}
+
+/* Fallback для мобильных устройств */
+@media (max-width: 480px) {
+  .header-content h1 .logo {
+    height: 28px;
+    max-width: 28px;
+  }
+  
+  .header-content h1 {
+    font-size: 18px;
+  }
 }
 
 .user-info {
