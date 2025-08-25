@@ -1,11 +1,9 @@
 services:
   - type: web
     name: jan-delivery-backend
-    env: node
+    env: docker
     plan: free
-    buildCommand: npm install
-    startCommand: node src/app.js
-    rootDir: backend
+    dockerfilePath: ./Dockerfile
     autoDeploy: true
     healthCheckPath: /health
     envVars:
