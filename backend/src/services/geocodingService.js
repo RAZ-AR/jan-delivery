@@ -1,12 +1,13 @@
 const axios = require('axios');
+const { checkDeliveryZone } = require('../utils/deliveryZone');
 
 class GeocodingService {
   constructor() {
     this.apiKey = process.env.OPENROUTE_API_KEY;
     this.baseUrl = 'https://api.openrouteservice.org/geocode';
-    // Центр Белграда
-    this.deliveryCenter = { lat: 44.7866, lon: 20.4489 };
-    this.deliveryRadiusMeters = 15000; // 15 км
+    // Центр доставки в Нови Сад (из KML зоны)
+    this.deliveryCenter = { lat: 44.81, lon: 20.46 };
+    this.deliveryRadiusMeters = 15000; // 15 км (для fallback)
   }
 
   // Геокодирование адреса (получение координат)
@@ -118,31 +119,25 @@ class GeocodingService {
     }
   }
 
-  // Проверка, доставляем ли мы по адресу (Белград, радиус 15км)
+  // Проверка, доставляем ли мы по адресу (используем полигон зоны доставки)
   async isDeliveryAvailable(address) {
     const coordinates = await this.geocodeAddress(address);
     if (!coordinates) return false;
 
-    const route = await this.calculateDistance(
-      this.deliveryCenter.lat,
-      this.deliveryCenter.lon,
-      coordinates.latitude,
-      coordinates.longitude
-    );
-    if (!route) return false;
-    return route.distance <= this.deliveryRadiusMeters;
+    // Используем точную проверку по полигону
+    const zoneCheck = checkDeliveryZone(coordinates.longitude, coordinates.latitude);
+    return zoneCheck.inZone;
   }
 
-  // Быстрая проверка по координатам
+  // Быстрая проверка по координатам (используем полигон зоны доставки)
   async isDeliveryAvailableByCoords(latitude, longitude) {
-    const route = await this.calculateDistance(
-      this.deliveryCenter.lat,
-      this.deliveryCenter.lon,
-      latitude,
-      longitude
-    );
-    if (!route) return false;
-    return route.distance <= this.deliveryRadiusMeters;
+    const zoneCheck = checkDeliveryZone(longitude, latitude);
+    return zoneCheck.inZone;
+  }
+
+  // Подробная проверка зоны доставки с дополнительной информацией
+  async checkDeliveryZoneDetails(latitude, longitude) {
+    return checkDeliveryZone(longitude, latitude);
   }
 
   // Автокомплит адресов для поиска

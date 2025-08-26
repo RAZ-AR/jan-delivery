@@ -22,17 +22,26 @@ router.post('/', async (req, res) => {
 router.post('/check-delivery-zone', async (req, res) => {
   try {
     const { address, latitude, longitude } = req.body;
-    let inZone = false;
+    let zoneData = null;
 
     if (address) {
-      inZone = await geocodingService.isDeliveryAvailable(address);
+      // Сначала геокодируем адрес
+      const coordinates = await geocodingService.geocodeAddress(address);
+      if (!coordinates) {
+        return res.status(400).json({ success: false, error: 'Address not found' });
+      }
+      
+      // Проверяем зону доставки
+      zoneData = await geocodingService.checkDeliveryZoneDetails(coordinates.latitude, coordinates.longitude);
+      zoneData.address = coordinates.formatted_address;
+      
     } else if (typeof latitude === 'number' && typeof longitude === 'number') {
-      inZone = await geocodingService.isDeliveryAvailableByCoords(latitude, longitude);
+      zoneData = await geocodingService.checkDeliveryZoneDetails(latitude, longitude);
     } else {
       return res.status(400).json({ success: false, error: 'address or coordinates required' });
     }
 
-    res.json({ success: true, data: { inZone } });
+    res.json({ success: true, data: zoneData });
   } catch (error) {
     console.error('Ошибка проверки зоны доставки:', error);
     res.status(500).json({ success: false, error: 'Check delivery zone failed' });

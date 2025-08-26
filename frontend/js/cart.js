@@ -450,11 +450,15 @@ class CartManager {
 
     try {
       // Проверить зону доставки
-      const inZone = await api.checkDeliveryZone({ address });
+      const zoneResult = await api.checkDeliveryZone({ address });
+      const inZone = zoneResult?.inZone || false;
+      
       if (!inZone) {
         if (this.zoneWarning) this.zoneWarning.style.display = 'block';
         if (this.waitlistBtn) this.waitlistBtn.style.display = 'inline-block';
-        utils.showToast('Адрес вне зоны доставки', 'warning');
+        
+        const message = zoneResult?.reason || 'Адрес вне зоны доставки';
+        utils.showToast(message, 'warning');
         return;
       } else {
         if (this.zoneWarning) this.zoneWarning.style.display = 'none';
@@ -614,27 +618,44 @@ class CartManager {
     if (!addressData) return;
     
     try {
-      let inZone = false;
+      let zoneResult = null;
       
       if (addressData.coordinates) {
-        inZone = await api.checkDeliveryZone({
+        zoneResult = await api.checkDeliveryZone({
           latitude: addressData.coordinates.latitude,
           longitude: addressData.coordinates.longitude
         });
       } else if (addressData.text) {
-        inZone = await api.checkDeliveryZone({ address: addressData.text });
+        zoneResult = await api.checkDeliveryZone({ address: addressData.text });
       }
+      
+      const inZone = zoneResult?.inZone || false;
       
       if (inZone) {
         this.zoneWarning.style.display = 'none';
         this.waitlistBtn.style.display = 'none';
+        
+        // Показать информацию о зоне
+        if (zoneResult.zone) {
+          utils.showToast(`Доставка: ${zoneResult.zone}`, 'success');
+        }
       } else {
         this.zoneWarning.style.display = 'block';
         this.waitlistBtn.style.display = 'block';
+        
+        // Показать причину недоступности
+        if (zoneResult?.reason) {
+          const warningElement = document.getElementById('zone-warning');
+          if (warningElement) {
+            warningElement.textContent = zoneResult.reason + '. Вы можете продолжить в список ожидания.';
+          }
+        }
       }
       
     } catch (error) {
       utils.logError('Ошибка проверки зоны доставки:', error);
+      this.zoneWarning.style.display = 'block';
+      this.waitlistBtn.style.display = 'block';
     }
   }
 

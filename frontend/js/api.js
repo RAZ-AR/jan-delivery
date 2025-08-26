@@ -239,11 +239,17 @@ class ApiService {
     try {
       const payload = address ? { address } : { latitude, longitude };
       const response = await this.post(CONFIG.ENDPOINTS.CHECK_ZONE, payload);
-      return response.success ? response.data?.inZone : false;
+      return response.success ? response.data : { inZone: false, error: 'API error' };
     } catch (error) {
       utils.logError('Ошибка проверки зоны доставки:', error);
-      return false;
+      return { inZone: false, error: 'Network error' };
     }
+  }
+
+  // Обратная совместимость - только проверка доступности
+  async isDeliveryAvailable({ address, latitude, longitude }) {
+    const result = await this.checkDeliveryZone({ address, latitude, longitude });
+    return result.inZone || false;
   }
 
   // Добавить в список ожидания
