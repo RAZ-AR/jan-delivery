@@ -175,7 +175,11 @@ class TelegramService {
       const itemsList = items.map(item => `• ${item.name} x${item.quantity} - ${item.price * item.quantity} RSD`).join('\n');
       
       const userInfo = orderData.userInfo || {};
-      const userName = userInfo.first_name ? `${userInfo.first_name} ${userInfo.last_name || ''}`.trim() : 'Неизвестно';
+      const userName = userInfo.first_name 
+        ? `${userInfo.first_name} ${userInfo.last_name || ''}`.trim()
+        : userInfo.username 
+        ? `@${userInfo.username}` 
+        : `ID: ${orderData.userId}`;
       
       const groupMessage = `🆕 НОВЫЙ ЗАКАЗ!\n\n` +
         `📋 Заказ: #${orderData.id}\n` +

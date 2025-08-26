@@ -104,21 +104,22 @@ class App {
 
   async registerUser() {
     const user = telegram.getUser();
-    if (!user) {
-      utils.log('Пользователь не найден, пропускаем регистрацию');
+    if (!user || !user.id) {
+      utils.log('Пользователь не найден или нет ID, пропускаем регистрацию');
       return;
     }
 
     try {
       await api.createOrUpdateUser({
         userId: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        username: user.username,
-        language_code: user.language_code
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        username: user.username || '',
+        language_code: user.language_code || 'ru'
       });
       
-      utils.log('Пользователь зарегистрирован:', user.first_name);
+      const displayName = user.first_name || user.username || `ID: ${user.id}`;
+      utils.log('Пользователь зарегистрирован:', displayName);
     } catch (error) {
       utils.logError('Ошибка регистрации пользователя:', error);
     }
@@ -156,7 +157,8 @@ class App {
     // Обновить информацию о пользователе
     const user = telegram.getUser();
     if (user && this.userNameSpan) {
-      this.userNameSpan.textContent = user.first_name;
+      const displayName = user.first_name || user.username || `ID: ${user.id}`;
+      this.userNameSpan.textContent = displayName;
     }
 
     // Показать основной интерфейс

@@ -425,8 +425,9 @@ class CartManager {
       return;
     }
 
-    if (!user.first_name) {
-      utils.showToast('Не удалось получить имя из Telegram', 'error');
+    // Используем fallback если нет имени
+    if (!user.first_name && !user.username && !user.id) {
+      utils.showToast('Ошибка авторизации Telegram', 'error');
       return;
     }
 
