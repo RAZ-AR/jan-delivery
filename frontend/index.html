@@ -127,8 +127,18 @@
                     </div>
                     <div class="form-group">
                         <label>Адрес доставки</label>
-                        <input type="text" id="address-input" placeholder="Начните вводить адрес...">
+                        <input type="text" id="address-input" placeholder="Начните вводить улицу...">
                         <button id="get-location" class="location-btn">📍 Определить местоположение</button>
+                        <div class="address-details" style="display:flex;gap:12px;margin-top:8px;">
+                            <div style="flex:1;">
+                                <label style="font-size:12px;color:var(--tg-theme-hint-color);">Дом</label>
+                                <input type="text" id="house-input" placeholder="№ дома" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;font-size:14px;">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-size:12px;color:var(--tg-theme-hint-color);">Квартира</label>
+                                <input type="text" id="apartment-input" placeholder="№ кв." style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;font-size:14px;">
+                            </div>
+                        </div>
                         <div id="zone-warning" style="display:none;color:var(--warning-color);margin-top:8px;">
                             Адрес вне зоны доставки. Вы можете продолжить в список ожидания.
                         </div>

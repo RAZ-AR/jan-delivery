@@ -23,6 +23,8 @@ class CartManager {
     this.orderModal = document.getElementById('order-modal');
     this.phoneInput = document.getElementById('phone-input');
     this.addressInput = document.getElementById('address-input');
+    this.houseInput = document.getElementById('house-input');
+    this.apartmentInput = document.getElementById('apartment-input');
     this.notesInput = document.getElementById('notes-input');
     this.paymentCash = document.getElementById('payment-cash');
     this.paymentCard = document.getElementById('payment-card');
@@ -404,7 +406,9 @@ class CartManager {
 
     // Валидация
     const phone = this.phoneInput?.value.trim();
-    const address = this.addressInput?.value.trim();
+    const street = this.addressInput?.value.trim();
+    const house = this.houseInput?.value.trim();
+    const apartment = this.apartmentInput?.value.trim();
 
     // Телефон необязательный, но если введен - должен быть корректным
     if (phone && !utils.validatePhone(phone)) {
@@ -413,11 +417,21 @@ class CartManager {
       return;
     }
 
-    if (!address) {
-      utils.showToast('Введите адрес доставки', 'warning');
+    if (!street) {
+      utils.showToast('Введите название улицы', 'warning');
       this.addressInput?.focus();
       return;
     }
+
+    if (!house) {
+      utils.showToast('Введите номер дома', 'warning');
+      this.houseInput?.focus();
+      return;
+    }
+
+    // Формируем полный адрес
+    const fullAddress = `${street}, д. ${house}${apartment ? `, кв. ${apartment}` : ''}`;
+    const address = fullAddress;
 
     const user = telegram.getUser();
     if (!user) {
@@ -498,10 +512,16 @@ class CartManager {
   async addToWaitlist() {
     try {
       const user = telegram.getUser();
+      // Формируем полный адрес для waitlist
+      const street = this.addressInput?.value.trim();
+      const house = this.houseInput?.value.trim();
+      const apartment = this.apartmentInput?.value.trim();
+      const fullAddress = street && house ? `${street}, д. ${house}${apartment ? `, кв. ${apartment}` : ''}` : street;
+      
       const ok = await api.addToWaitlist({
         userId: user?.id,
         phone: this.phoneInput?.value.trim() || '',
-        address: this.addressInput?.value.trim() || '',
+        address: fullAddress || '',
         notes: this.notesInput?.value.trim() || ''
       });
       if (ok) {

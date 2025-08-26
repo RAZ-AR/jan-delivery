@@ -250,8 +250,10 @@ class AddressAutocomplete {
     const suggestion = this.lastResults[index];
     this.selectedSuggestion = suggestion;
     
-    // Заполнить поле ввода
-    this.input.value = suggestion.text || suggestion.address || '';
+    // Заполнить поле ввода только названием улицы
+    const fullText = suggestion.text || suggestion.address || '';
+    const cleanStreet = fullText.replace(/,?\s*\d+.*$/, '').trim(); // Убираем номера домов
+    this.input.value = cleanStreet;
     
     // Скрыть предложения
     this.hideSuggestions();

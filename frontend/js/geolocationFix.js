@@ -26,19 +26,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const addressDetails = await api.reverseGeocode(latitude, longitude);
             
             if (addressDetails && addressDetails.formatted_address) {
+              // Извлекаем только название улицы без номера дома
+              const streetName = addressDetails.address || addressDetails.formatted_address;
+              const cleanStreet = streetName.replace(/,?\s*\d+.*$/, '').trim(); // Убираем номера
+              
               // Установить адрес в поле
               if (this.addressAutocomplete) {
-                this.addressAutocomplete.setValue(addressDetails.formatted_address, {
+                this.addressAutocomplete.setValue(cleanStreet, {
                   coordinates: { latitude, longitude },
                   ...addressDetails
                 });
               } else if (this.addressInput) {
-                this.addressInput.value = addressDetails.formatted_address;
+                this.addressInput.value = cleanStreet;
               }
               
               // Сохранить выбранный адрес
               this.selectedAddress = {
-                text: addressDetails.formatted_address,
+                text: cleanStreet,
                 coordinates: { latitude, longitude },
                 ...addressDetails
               };
