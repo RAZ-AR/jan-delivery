@@ -152,7 +152,7 @@ class GeocodingService {
       return [];
     }
 
-    if (!query || query.length < 3) {
+    if (!query || query.length < 2) {
       return [];
     }
 
@@ -161,32 +161,36 @@ class GeocodingService {
         params: {
           api_key: this.apiKey,
           text: query,
-          boundary_country: 'RS', // Сербия для Белграда
-          focus_point: `${this.deliveryCenter.lon},${this.deliveryCenter.lat}`,
+          'boundary.country': 'RS', // Сербия для Белграда
+          'focus.point.lat': this.deliveryCenter.lat,
+          'focus.point.lon': this.deliveryCenter.lon,
           size: limit,
-          layers: ['address', 'street', 'venue']
+          layers: 'address,street,venue'
         },
-        timeout: 5000
+        timeout: 10000
       });
 
       const features = response.data.features || [];
       
-      return features.map(feature => ({
-        id: feature.properties.id,
-        text: feature.properties.label,
-        address: feature.properties.name,
-        street: feature.properties.street,
-        locality: feature.properties.locality,
-        region: feature.properties.region,
-        coordinates: {
-          longitude: feature.geometry.coordinates[0],
-          latitude: feature.geometry.coordinates[1]
-        },
-        confidence: feature.properties.confidence || 0
-      })).sort((a, b) => b.confidence - a.confidence);
+      return features.map(feature => {
+        const props = feature.properties;
+        return {
+          id: props.id || props.gid,
+          text: props.label,
+          address: props.name,
+          street: props.street,
+          locality: props.locality || props.localadmin,
+          region: props.region,
+          coordinates: {
+            longitude: feature.geometry.coordinates[0],
+            latitude: feature.geometry.coordinates[1]
+          },
+          confidence: props.confidence || 0
+        };
+      }).sort((a, b) => b.confidence - a.confidence);
 
     } catch (error) {
-      console.error('Ошибка поиска адресов:', error.message);
+      console.error('Ошибка поиска адресов:', error.response?.data || error.message);
       return [];
     }
   }
@@ -205,9 +209,9 @@ class GeocodingService {
           'point.lat': latitude,
           'point.lon': longitude,
           size: 1,
-          layers: ['address', 'street']
+          layers: 'address,street,venue'
         },
-        timeout: 5000
+        timeout: 10000
       });
 
       const features = response.data.features;
@@ -220,7 +224,7 @@ class GeocodingService {
           formatted_address: props.label,
           street: props.street,
           house_number: props.housenumber,
-          locality: props.locality,
+          locality: props.locality || props.localadmin,
           region: props.region,
           postal_code: props.postalcode,
           country: props.country,
@@ -233,7 +237,7 @@ class GeocodingService {
 
       return null;
     } catch (error) {
-      console.error('Ошибка получения деталей адреса:', error.message);
+      console.error('Ошибка получения деталей адреса:', error.response?.data || error.message);
       return null;
     }
   }
