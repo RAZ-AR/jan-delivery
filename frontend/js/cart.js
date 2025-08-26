@@ -31,6 +31,24 @@ class CartManager {
     this.zoneWarning = document.getElementById('zone-warning');
     this.waitlistBtn = document.getElementById('waitlist-btn');
     this.addressSuggestions = document.getElementById('address-suggestions');
+    
+    // Инициализировать автокомплит адреса
+    this.initAddressAutocomplete();
+  }
+
+  initAddressAutocomplete() {
+    if (this.addressInput && typeof AddressAutocomplete !== 'undefined') {
+      this.addressAutocomplete = new AddressAutocomplete(this.addressInput, {
+        onSelect: (suggestion) => {
+          utils.log('Выбран адрес:', suggestion);
+          this.selectedAddress = suggestion;
+          this.checkDeliveryZone(suggestion);
+        },
+        onError: (error) => {
+          utils.logError('Ошибка автокомплита:', error);
+        }
+      });
+    }
   }
 
   bindEvents() {
@@ -568,6 +586,35 @@ class CartManager {
   getDeliveryAmount() {
     const subtotal = this.getSubtotal();
     return subtotal >= CONFIG.MIN_ORDER_RSD ? 0 : CONFIG.DELIVERY_COST_BELOW_MIN;
+  }
+
+  // Проверить зону доставки для выбранного адреса
+  async checkDeliveryZone(addressData) {
+    if (!addressData) return;
+    
+    try {
+      let inZone = false;
+      
+      if (addressData.coordinates) {
+        inZone = await api.checkDeliveryZone({
+          latitude: addressData.coordinates.latitude,
+          longitude: addressData.coordinates.longitude
+        });
+      } else if (addressData.text) {
+        inZone = await api.checkDeliveryZone({ address: addressData.text });
+      }
+      
+      if (inZone) {
+        this.zoneWarning.style.display = 'none';
+        this.waitlistBtn.style.display = 'none';
+      } else {
+        this.zoneWarning.style.display = 'block';
+        this.waitlistBtn.style.display = 'block';
+      }
+      
+    } catch (error) {
+      utils.logError('Ошибка проверки зоны доставки:', error);
+    }
   }
 
   // Утилиты

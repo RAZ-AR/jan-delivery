@@ -256,6 +256,32 @@ class ApiService {
       return false;
     }
   }
+
+  // Поиск адресов для автокомплита
+  async searchAddresses(query, limit = 5) {
+    try {
+      if (!query || query.length < 2) {
+        return [];
+      }
+      
+      const response = await this.get(`${CONFIG.ENDPOINTS.GEOCODE}/search?q=${encodeURIComponent(query)}&limit=${limit}`, false);
+      return response.success ? response.data : [];
+    } catch (error) {
+      utils.logError('Ошибка поиска адресов:', error);
+      return [];
+    }
+  }
+
+  // Обратное геокодирование - получить адрес по координатам
+  async reverseGeocode(latitude, longitude) {
+    try {
+      const response = await this.post(`${CONFIG.ENDPOINTS.GEOCODE}/reverse`, { latitude, longitude });
+      return response.success ? response.data : null;
+    } catch (error) {
+      utils.logError('Ошибка обратного геокодирования:', error);
+      return null;
+    }
+  }
 }
 
 // Создать глобальный экземпляр
