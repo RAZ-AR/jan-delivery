@@ -144,6 +144,103 @@ class GeocodingService {
     if (!route) return false;
     return route.distance <= this.deliveryRadiusMeters;
   }
+
+  // Автокомплит адресов для поиска
+  async searchAddresses(query, limit = 5) {
+    if (!this.apiKey) {
+      console.warn('⚠️ OPENROUTE_API_KEY не установлен');
+      return [];
+    }
+
+    if (!query || query.length < 2) {
+      return [];
+    }
+
+    try {
+      const response = await axios.get(`${this.baseUrl}/search`, {
+        params: {
+          api_key: this.apiKey,
+          text: query,
+          'boundary.country': 'RS', // Сербия для Белграда
+          'focus.point.lat': this.deliveryCenter.lat,
+          'focus.point.lon': this.deliveryCenter.lon,
+          size: limit,
+          layers: 'address,street,venue'
+        },
+        timeout: 10000
+      });
+
+      const features = response.data.features || [];
+      
+      return features.map(feature => {
+        const props = feature.properties;
+        return {
+          id: props.id || props.gid,
+          text: props.label,
+          address: props.name,
+          street: props.street,
+          locality: props.locality || props.localadmin,
+          region: props.region,
+          coordinates: {
+            longitude: feature.geometry.coordinates[0],
+            latitude: feature.geometry.coordinates[1]
+          },
+          confidence: props.confidence || 0
+        };
+      }).sort((a, b) => b.confidence - a.confidence);
+
+    } catch (error) {
+      console.error('Ошибка поиска адресов:', error.response?.data || error.message);
+      return [];
+    }
+  }
+
+  // Получить подробную информацию об адресе по координатам
+  async getAddressDetails(latitude, longitude) {
+    if (!this.apiKey) {
+      console.warn('⚠️ OPENROUTE_API_KEY не установлен');
+      return null;
+    }
+
+    try {
+      const response = await axios.get(`${this.baseUrl}/reverse`, {
+        params: {
+          api_key: this.apiKey,
+          'point.lat': latitude,
+          'point.lon': longitude,
+          size: 1,
+          layers: 'address,street,venue'
+        },
+        timeout: 10000
+      });
+
+      const features = response.data.features;
+      
+      if (features && features.length > 0) {
+        const feature = features[0];
+        const props = feature.properties;
+        
+        return {
+          formatted_address: props.label,
+          street: props.street,
+          house_number: props.housenumber,
+          locality: props.locality || props.localadmin,
+          region: props.region,
+          postal_code: props.postalcode,
+          country: props.country,
+          coordinates: {
+            latitude: latitude,
+            longitude: longitude
+          }
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Ошибка получения деталей адреса:', error.response?.data || error.message);
+      return null;
+    }
+  }
 }
 
 module.exports = new GeocodingService();
