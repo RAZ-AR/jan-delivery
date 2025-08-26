@@ -1,0 +1,34 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Prepare production frontend
+      run: |
+        # Use production version as index.html
+        cp frontend/index.prod.html frontend/index.html
+        
+    - name: Deploy to GitHub Pages (Production)
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./frontend
+        destination_dir: .
+        cname: raz-ar.github.io
