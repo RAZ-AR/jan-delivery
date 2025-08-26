@@ -167,4 +167,4 @@ const utils = {
     console.error('[JAN Delivery ERROR]', ...args);
   }
 };
-// Force rebuild Tue Aug 26 17:00:18 CEST 2025
+// Force rebuild delivery zones Tue Aug 26 21:15:00 CEST 2025
