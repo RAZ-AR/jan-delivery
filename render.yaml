@@ -31,6 +31,9 @@ services:
       # Frontend URL (for bot button)
       - key: WEB_APP_URL
         sync: false
+      # Telegram Group for Orders
+      - key: TELEGRAM_GROUP_CHAT_ID
+        sync: false
 
   - type: static
     name: jan-delivery-frontend

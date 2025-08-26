@@ -11,7 +11,7 @@ const CONFIG = {
   // API endpoints
   API_BASE_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3000'
-    : (__API_BASE_FROM_META__ || 'https://jan-delivery-backend.onrender.com'),
+    : (__API_BASE_FROM_META__ || 'https://jan-delivery.onrender.com'),
   
   // Endpoints
   ENDPOINTS: {
