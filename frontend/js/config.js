@@ -57,8 +57,8 @@ const CONFIG = {
     'cancelled': 'Отменен'
   },
 
-  // Phone number validation (простая, для RS можно упростить)
-  PHONE_REGEX: /^(\+381|0)\d{8,11}$/,
+  // Phone number validation (международный формат)
+  PHONE_REGEX: /^(\+\d{1,4})?\d{7,14}$/,
 
   // Development mode
   DEBUG: window.location.hostname === 'localhost'
