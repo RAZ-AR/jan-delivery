@@ -406,13 +406,8 @@ class CartManager {
     const phone = this.phoneInput?.value.trim();
     const address = this.addressInput?.value.trim();
 
-    if (!phone) {
-      utils.showToast('Введите номер телефона', 'warning');
-      this.phoneInput?.focus();
-      return;
-    }
-
-    if (!utils.validatePhone(phone)) {
+    // Телефон необязательный, но если введен - должен быть корректным
+    if (phone && !utils.validatePhone(phone)) {
       utils.showToast('Некорректный номер телефона', 'warning');
       this.phoneInput?.focus();
       return;
@@ -427,6 +422,11 @@ class CartManager {
     const user = telegram.getUser();
     if (!user) {
       utils.showToast('Ошибка авторизации', 'error');
+      return;
+    }
+
+    if (!user.first_name) {
+      utils.showToast('Не удалось получить имя из Telegram', 'error');
       return;
     }
 

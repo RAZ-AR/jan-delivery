@@ -11,7 +11,7 @@ const CONFIG = {
   // API endpoints
   API_BASE_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3000'
-    : (__API_BASE_FROM_META__ || 'https://jan-delivery-backend.onrender.com'),
+    : (__API_BASE_FROM_META__ || 'https://jan-delivery.onrender.com'),
   
   // Endpoints
   ENDPOINTS: {
@@ -57,8 +57,8 @@ const CONFIG = {
     'cancelled': 'Отменен'
   },
 
-  // Phone number validation (простая, для RS можно упростить)
-  PHONE_REGEX: /^(\+381|0)\d{8,11}$/,
+  // Phone number validation (международный формат)
+  PHONE_REGEX: /^(\+\d{1,4})?\d{7,14}$/,
 
   // Development mode
   DEBUG: window.location.hostname === 'localhost'

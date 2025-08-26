@@ -5,6 +5,7 @@ class TelegramService {
     this.bot = null;
     this.webhookUrl = process.env.TELEGRAM_WEBHOOK_URL;
     this.webAppUrl = process.env.WEB_APP_URL;
+    this.groupChatId = process.env.TELEGRAM_GROUP_CHAT_ID;
     this.adminIds = (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
     this.initBot();
   }
@@ -71,6 +72,50 @@ class TelegramService {
       }
     });
 
+    // Обработчики кнопок в группе для управления заказами
+    this.bot.action(/^(confirm|cancel|cooking|delivering|delivered)_(.+)$/, async (ctx) => {
+      try {
+        const action = ctx.match[1];
+        const orderId = ctx.match[2];
+        
+        // Маппинг действий в статусы
+        const statusMap = {
+          'confirm': 'confirmed',
+          'cancel': 'cancelled',
+          'cooking': 'cooking',
+          'delivering': 'delivering',
+          'delivered': 'delivered'
+        };
+        
+        const status = statusMap[action];
+        if (!status) {
+          await ctx.answerCbQuery('❌ Неизвестное действие');
+          return;
+        }
+        
+        // Ленивый импорт для избежания циклов
+        const orderService = require('./orderService');
+        await orderService.updateOrderStatus(orderId, status);
+        
+        const actionMessages = {
+          'confirm': '✅ Заказ подтвержден',
+          'cancel': '❌ Заказ отменен',
+          'cooking': '👨‍🍳 Заказ готовится',
+          'delivering': '🚗 Заказ в пути',
+          'delivered': '✅ Заказ доставлен'
+        };
+        
+        await ctx.answerCbQuery(actionMessages[action]);
+        await ctx.editMessageText(
+          ctx.callbackQuery.message.text + `\n\n🔄 ${actionMessages[action]} (${ctx.from.first_name})`
+        );
+        
+      } catch (e) {
+        console.error('Ошибка обработки кнопки заказа:', e.message);
+        await ctx.answerCbQuery(`❌ Ошибка: ${e.message}`);
+      }
+    });
+
     console.log('✅ Telegram команды настроены (Telegraf)');
   }
 
@@ -89,6 +134,9 @@ class TelegramService {
         `📍 Адрес: ${orderData.address}\n` +
         `⏱️ Время доставки: ${orderData.estimatedDelivery}`;
       await this.bot.telegram.sendMessage(userId, message);
+      
+      // Отправить уведомление в группу
+      await this.sendOrderToGroup(orderData);
     } catch (e) {
       console.error('Ошибка отправки уведомления:', e.message);
     }
@@ -106,8 +154,60 @@ class TelegramService {
       };
       const message = `📋 Заказ #${orderData.id}\n${statusMessages[orderData.status] || 'Статус заказа обновлен'}`;
       await this.bot.telegram.sendMessage(userId, message);
+      
+      // Отправить обновление статуса в группу
+      if (this.groupChatId) {
+        const groupMessage = `🔄 Статус заказа изменен\n\n📋 Заказ #${orderData.id}\n📊 Статус: ${statusMessages[orderData.status] || orderData.status}`;
+        await this.bot.telegram.sendMessage(this.groupChatId, groupMessage);
+      }
     } catch (e) {
       console.error('Ошибка отправки статуса:', e.message);
+    }
+  }
+
+  // Отправить заказ в группу
+  async sendOrderToGroup(orderData) {
+    if (!this.bot || !this.groupChatId) return;
+    
+    try {
+      // Формируем детализированную информацию о заказе
+      const items = Array.isArray(orderData.items) ? orderData.items : [];
+      const itemsList = items.map(item => `• ${item.name} x${item.quantity} - ${item.price * item.quantity} RSD`).join('\n');
+      
+      const userInfo = orderData.userInfo || {};
+      const userName = userInfo.first_name ? `${userInfo.first_name} ${userInfo.last_name || ''}`.trim() : 'Неизвестно';
+      
+      const groupMessage = `🆕 НОВЫЙ ЗАКАЗ!\n\n` +
+        `📋 Заказ: #${orderData.id}\n` +
+        `👤 Клиент: ${userName}\n` +
+        `📱 Телефон: ${orderData.phone || 'Не указан'}\n` +
+        `📍 Адрес: ${orderData.address}\n\n` +
+        `🛒 Заказанные блюда:\n${itemsList}\n\n` +
+        `💰 Итого: ${orderData.total} RSD\n` +
+        `💳 Оплата: ${orderData.payment_method === 'card' ? 'Картой' : 'Наличными'}\n` +
+        `⏱️ Время доставки: ${orderData.estimatedDelivery}\n` +
+        `📝 Комментарий: ${orderData.notes || 'Нет'}\n\n` +
+        `📊 Статус: ⏳ Ожидает подтверждения`;
+
+      // Добавляем кнопки для быстрого управления заказом
+      const keyboard = Markup.inlineKeyboard([
+        [
+          Markup.button.callback('✅ Подтвердить', `confirm_${orderData.id}`),
+          Markup.button.callback('❌ Отменить', `cancel_${orderData.id}`)
+        ],
+        [
+          Markup.button.callback('👨‍🍳 Готовится', `cooking_${orderData.id}`),
+          Markup.button.callback('🚗 В пути', `delivering_${orderData.id}`)
+        ],
+        [
+          Markup.button.callback('✅ Доставлен', `delivered_${orderData.id}`)
+        ]
+      ]);
+
+      await this.bot.telegram.sendMessage(this.groupChatId, groupMessage, keyboard);
+      console.log(`✅ Заказ #${orderData.id} отправлен в группу`);
+    } catch (e) {
+      console.error('Ошибка отправки заказа в группу:', e.message);
     }
   }
 }
