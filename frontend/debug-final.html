@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAN Delivery - Final Debug</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="jan-api-base" content="https://jan-delivery.onrender.com">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .log { background: #000; color: #0f0; padding: 15px; border-radius: 5px; white-space: pre-wrap; overflow-x: auto; margin: 10px 0; font-family: monospace; }
+        .menu-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 20px 0; }
+        .menu-item { background: white; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
+        .categories { margin: 20px 0; }
+        .category-btn { margin: 5px; padding: 8px 15px; border: 1px solid #ddd; background: white; border-radius: 5px; cursor: pointer; }
+        .category-btn.active { background: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <h1>JAN Delivery - Финальная отладка</h1>
+    
+    <h3>Логи выполнения:</h3>
+    <div id="logs" class="log"></div>
+    
+    <h3>Категории:</h3>
+    <div id="categories" class="categories"></div>
+    
+    <h3>Меню:</h3>
+    <div id="menu" class="menu-items"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/telegram.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/menu.js"></script>
+
+    <script>
+    let logContainer = document.getElementById('logs');
+    
+    function log(message) {
+        const time = new Date().toLocaleTimeString();
+        logContainer.textContent += `[${time}] ${message}\n`;
+        console.log(message);
+    }
+
+    async function debugApp() {
+        try {
+            log('=== ЗАПУСК ОТЛАДКИ ===');
+            
+            // Проверка объектов
+            log(`CONFIG доступен: ${typeof CONFIG === 'object'}`);
+            log(`telegram доступен: ${typeof telegram === 'object'}`);
+            log(`window.i18n доступен: ${typeof window.i18n === 'object'}`);
+            log(`api доступен: ${typeof api === 'object'}`);
+            log(`cart доступен: ${typeof cart === 'object'}`);
+            log(`menuManager доступен: ${typeof menuManager === 'object'}`);
+            
+            log(`DEBUG mode: ${CONFIG.DEBUG}`);
+            log(`API Base URL: ${api.baseUrl}`);
+            
+            // Инициализация i18n
+            log('Инициализация i18n...');
+            await window.i18n.init();
+            log(`i18n язык: ${window.i18n.getCurrentLanguage()}`);
+            
+            // Инициализация Telegram
+            log('Проверка Telegram WebApp...');
+            if (!telegram.isWebAppReady()) {
+                log('Telegram WebApp не готов, активируем mock режим');
+                telegram.mockTelegramForDevelopment();
+            }
+            log(`Telegram готов: ${telegram.isWebAppReady()}`);
+            
+            // Тест API
+            log('Тестирование API...');
+            const healthResponse = await fetch(`${api.baseUrl}/health`);
+            log(`Health check: ${healthResponse.ok ? 'OK' : 'FAILED'}`);
+            
+            // Загрузка меню
+            log('Загрузка меню...');
+            const menu = await api.getMenu('ru');
+            log(`Меню загружено: ${menu.length} блюд`);
+            
+            if (menu.length > 0) {
+                // Показать первые 5 блюд
+                const menuContainer = document.getElementById('menu');
+                menu.slice(0, 5).forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'menu-item';
+                    div.innerHTML = `
+                        <strong>${item.name}</strong><br>
+                        Категория: ${item.category}<br>
+                        Подкатегория: ${item.subCategory}<br>
+                        Цена: ${item.price} RSD
+                    `;
+                    menuContainer.appendChild(div);
+                });
+                log('Меню отображено');
+            }
+            
+            // Загрузка категорий
+            log('Загрузка категорий...');
+            const categories = await api.getCategoriesStructure('ru');
+            const catNames = Object.keys(categories);
+            log(`Категории загружены: ${catNames.length} категорий`);
+            
+            if (catNames.length > 0) {
+                const catContainer = document.getElementById('categories');
+                catNames.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'category-btn';
+                    btn.textContent = cat;
+                    btn.onclick = () => filterByCategory(cat, menu);
+                    catContainer.appendChild(btn);
+                });
+                log('Категории отображены');
+            }
+            
+            log('=== ОТЛАДКА ЗАВЕРШЕНА УСПЕШНО ===');
+            
+        } catch (error) {
+            log(`ОШИБКА: ${error.message}`);
+            log(`Stack: ${error.stack}`);
+        }
+    }
+    
+    function filterByCategory(category, menu) {
+        const filtered = menu.filter(item => item.category === category);
+        const menuContainer = document.getElementById('menu');
+        
+        menuContainer.innerHTML = '';
+        filtered.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'menu-item';
+            div.innerHTML = `
+                <strong>${item.name}</strong><br>
+                Категория: ${item.category}<br>
+                Подкатегория: ${item.subCategory}<br>
+                Цена: ${item.price} RSD
+            `;
+            menuContainer.appendChild(div);
+        });
+        
+        // Обновить активную кнопку
+        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        log(`Отфильтровано по категории "${category}": ${filtered.length} блюд`);
+    }
+
+    // Запуск отладки
+    log('Страница загружена, запуск отладки...');
+    debugApp();
+    </script>
+</body>
+</html>
