@@ -17,6 +17,9 @@ router.get('/category/:category/subcategories', menuController.getSubCategories)
 // GET /api/menu/subcategory/:subCategory - получить блюда по подкатегории
 router.get('/subcategory/:subCategory', menuController.getMenuBySubCategory);
 
+// GET /api/menu/debug - debug информация о таблице
+router.get('/debug', menuController.getDebugInfo);
+
 // GET /api/menu/:id - получить блюдо по ID (должно быть последним)
 router.get('/:id', menuController.getMenuItem);
 

@@ -125,6 +125,38 @@ const menuController = {
         error: 'Не удалось загрузить подкатегории'
       });
     }
+  },
+
+  // Debug информация о таблице
+  async getDebugInfo(req, res) {
+    try {
+      const { lang = 'ru' } = req.query;
+      const allItems = await menuService.getAllItems(lang);
+      const categories = await menuService.getCategoriesWithSubCategories(lang);
+      
+      res.json({
+        success: true,
+        debug: {
+          googleSheetsId: process.env.GOOGLE_SHEETS_ID,
+          totalItems: allItems.length,
+          availableItems: allItems.filter(item => item.available).length,
+          categoriesCount: Object.keys(categories).length,
+          categories: Object.keys(categories),
+          timestamp: new Date().toISOString(),
+          sampleItem: allItems[0] || null
+        }
+      });
+    } catch (error) {
+      console.error('Ошибка при получении debug информации:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка debug информации',
+        debug: {
+          googleSheetsId: process.env.GOOGLE_SHEETS_ID,
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
   }
 };
 

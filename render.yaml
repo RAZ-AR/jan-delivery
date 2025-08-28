@@ -18,7 +18,7 @@ services:
         sync: false
       - key: TELEGRAM_BOT_USERNAME
         sync: false
-      # Google Sheets
+      # Google Sheets - UPDATE TO: 1TOHGRsYeoG0oo2ywJ2G9DJhb7mmcSxJvLBsiEiMIYIs
       - key: GOOGLE_SHEETS_ID
         sync: false
       - key: GOOGLE_SERVICE_ACCOUNT_EMAIL
