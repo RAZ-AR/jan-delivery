@@ -145,6 +145,45 @@ class ApiService {
       utils.logError('Ошибка загрузки категории:', error);
       return [];
     }
+  },
+
+  // Получить меню по подкатегории
+  async getMenuBySubCategory(subCategory, lang = null) {
+    try {
+      const language = lang || (window.i18n ? window.i18n.getCurrentLanguage() : 'ru');
+      const endpoint = `${CONFIG.ENDPOINTS.MENU}/subcategory/${encodeURIComponent(subCategory)}?lang=${language}`;
+      const response = await this.get(endpoint);
+      return response.success ? response.data : [];
+    } catch (error) {
+      utils.logError('Ошибка загрузки подкатегории:', error);
+      return [];
+    }
+  },
+
+  // Получить структуру категорий с подкатегориями
+  async getCategoriesStructure(lang = null) {
+    try {
+      const language = lang || (window.i18n ? window.i18n.getCurrentLanguage() : 'ru');
+      const endpoint = `${CONFIG.ENDPOINTS.MENU}/categories?lang=${language}`;
+      const response = await this.get(endpoint);
+      return response.success ? response.data : {};
+    } catch (error) {
+      utils.logError('Ошибка загрузки структуры категорий:', error);
+      return {};
+    }
+  },
+
+  // Получить подкатегории для категории
+  async getSubCategories(category, lang = null) {
+    try {
+      const language = lang || (window.i18n ? window.i18n.getCurrentLanguage() : 'ru');
+      const endpoint = `${CONFIG.ENDPOINTS.MENU}/category/${encodeURIComponent(category)}/subcategories?lang=${language}`;
+      const response = await this.get(endpoint);
+      return response.success ? response.data : [];
+    } catch (error) {
+      utils.logError('Ошибка загрузки подкатегорий:', error);
+      return [];
+    }
   }
 
   // Создать заказ

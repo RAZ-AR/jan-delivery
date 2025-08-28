@@ -2,8 +2,11 @@
 class MenuManager {
   constructor() {
     this.menu = [];
+    this.categoriesStructure = {}; // Структура категорий с подкатегориями
     this.categories = [];
+    this.subCategories = [];
     this.currentCategory = 'all';
+    this.currentSubCategory = null;
     this.isLoading = false;
     
     this.initElements();
@@ -12,6 +15,7 @@ class MenuManager {
 
   initElements() {
     this.categoriesFilter = document.querySelector('.categories-filter');
+    this.subCategoriesFilter = null; // Будет создан динамически
     this.menuGrid = document.getElementById('menu-items');
     this.itemModal = document.getElementById('item-modal');
     this.itemDetails = document.getElementById('item-details');
@@ -23,6 +27,14 @@ class MenuManager {
       if (e.target.classList.contains('category-btn')) {
         telegram.hapticFeedback('selection');
         this.selectCategory(e.target.dataset.category);
+      }
+    });
+
+    // Обработчик для фильтра подкатегорий (делегирование события)
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('subcategory-btn')) {
+        telegram.hapticFeedback('selection');
+        this.selectSubCategory(e.target.dataset.subcategory);
       }
     });
 
@@ -57,9 +69,20 @@ class MenuManager {
     this.showLoading();
 
     try {
-      this.menu = await api.getMenu(language);
+      // Загружаем меню и структуру категорий
+      const [menuData, categoriesStructure] = await Promise.all([
+        api.getMenu(language),
+        api.getCategoriesStructure(language)
+      ]);
+
+      this.menu = menuData;
+      this.categoriesStructure = categoriesStructure;
+      
       this.extractCategories();
       this.renderCategories();
+      
+      // Сбросить текущую подкатегорию при смене языка
+      this.currentSubCategory = null;
       this.renderMenu();
       
       utils.log('Меню загружено:', this.menu.length, 'блюд', language ? `(${language})` : '');
@@ -155,6 +178,111 @@ class MenuManager {
       const newName = this.getCategoryName(category);
       btn.textContent = newName;
     });
+
+    // Также обновляем подкатегории если они отображаются
+    this.updateSubCategoryButtons();
+  }
+
+  // Выбрать категорию
+  async selectCategory(category) {
+    this.currentCategory = category;
+    this.currentSubCategory = null; // Сбросить подкатегорию
+
+    // Обновить активное состояние кнопок категорий
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.category === category);
+    });
+
+    // Показать подкатегории для выбранной категории
+    await this.showSubCategories(category);
+    
+    // Обновить меню
+    this.renderMenu();
+  }
+
+  // Показать подкатегории для категории
+  async showSubCategories(category) {
+    if (category === 'all') {
+      this.hideSubCategories();
+      return;
+    }
+
+    try {
+      const subCategories = this.categoriesStructure[category]?.subCategories || [];
+      
+      if (subCategories.length === 0) {
+        this.hideSubCategories();
+        return;
+      }
+
+      this.renderSubCategories(subCategories);
+    } catch (error) {
+      utils.logError('Ошибка загрузки подкатегорий:', error);
+      this.hideSubCategories();
+    }
+  }
+
+  // Отрендерить подкатегории
+  renderSubCategories(subCategories) {
+    // Создаем контейнер для подкатегорий если его нет
+    if (!this.subCategoriesFilter) {
+      this.subCategoriesFilter = document.createElement('div');
+      this.subCategoriesFilter.className = 'subcategories-filter';
+      this.categoriesFilter.insertAdjacentElement('afterend', this.subCategoriesFilter);
+    }
+
+    const buttons = ['all', ...subCategories].map(subCategory => {
+      const name = subCategory === 'all' ? 
+        (window.i18n ? window.i18n.t('menu.categories.all') : 'Все') :
+        subCategory;
+      const active = subCategory === this.currentSubCategory || 
+                    (subCategory === 'all' && !this.currentSubCategory) ? 'active' : '';
+      
+      return `
+        <button class="subcategory-btn ${active}" data-subcategory="${subCategory}">
+          ${name}
+        </button>
+      `;
+    }).join('');
+
+    this.subCategoriesFilter.innerHTML = buttons;
+    this.subCategoriesFilter.style.display = 'flex';
+  }
+
+  // Скрыть подкатегории
+  hideSubCategories() {
+    if (this.subCategoriesFilter) {
+      this.subCategoriesFilter.style.display = 'none';
+      this.subCategoriesFilter.innerHTML = '';
+    }
+  }
+
+  // Выбрать подкатегорию
+  selectSubCategory(subCategory) {
+    this.currentSubCategory = subCategory === 'all' ? null : subCategory;
+
+    // Обновить активное состояние кнопок подкатегорий
+    document.querySelectorAll('.subcategory-btn').forEach(btn => {
+      const isActive = btn.dataset.subcategory === subCategory ||
+                      (btn.dataset.subcategory === 'all' && subCategory === 'all');
+      btn.classList.toggle('active', isActive);
+    });
+
+    this.renderMenu();
+  }
+
+  // Обновить кнопки подкатегорий (для смены языка)
+  updateSubCategoryButtons() {
+    const buttons = this.subCategoriesFilter?.querySelectorAll('.subcategory-btn');
+    if (!buttons) return;
+
+    buttons.forEach(btn => {
+      const subCategory = btn.dataset.subcategory;
+      if (subCategory === 'all') {
+        btn.textContent = window.i18n ? window.i18n.t('menu.categories.all') : 'Все';
+      }
+      // Подкатегории уже переведены с сервера
+    });
   }
 
   // Отрендерить меню
@@ -176,8 +304,20 @@ class MenuManager {
   getFilteredMenu() {
     return this.menu.filter(item => {
       if (!item.available) return false;
+      
+      // Если выбраны "Все" категории
       if (this.currentCategory === 'all') return true;
-      return item.category.toLowerCase() === this.currentCategory;
+      
+      // Фильтр по категории
+      if (item.category.toLowerCase() !== this.currentCategory.toLowerCase()) {
+        return false;
+      }
+      
+      // Если подкатегория не выбрана, показываем все блюда категории
+      if (!this.currentSubCategory) return true;
+      
+      // Фильтр по подкатегории
+      return item.subCategory.toLowerCase() === this.currentSubCategory.toLowerCase();
     });
   }
 
@@ -219,20 +359,7 @@ class MenuManager {
     `;
   }
 
-  // Выбрать категорию
-  selectCategory(category) {
-    this.currentCategory = category;
-    
-    // Обновить активную кнопку
-    this.categoriesFilter.querySelectorAll('.category-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.category === category);
-    });
-
-    // Перерендерить меню
-    this.renderMenu();
-    
-    utils.log('Выбрана категория:', category);
-  }
+  // Старый метод удален - используется новый async selectCategory выше
 
   // Добавить в корзину
   async addToCart(itemId) {

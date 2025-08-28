@@ -66,6 +66,65 @@ const menuController = {
         error: 'Не удалось загрузить категорию'
       });
     }
+  },
+
+  // Получить блюда по подкатегории
+  async getMenuBySubCategory(req, res) {
+    try {
+      const { subCategory } = req.params;
+      const { lang = 'ru' } = req.query;
+      const items = await menuService.getItemsBySubCategory(subCategory, lang);
+      
+      res.json({
+        success: true,
+        data: items
+      });
+    } catch (error) {
+      console.error('Ошибка при получении подкатегории:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Не удалось загрузить подкатегорию'
+      });
+    }
+  },
+
+  // Получить структуру категорий с подкатегориями
+  async getCategoriesStructure(req, res) {
+    try {
+      const { lang = 'ru' } = req.query;
+      const structure = await menuService.getCategoriesWithSubCategories(lang);
+      
+      res.json({
+        success: true,
+        data: structure
+      });
+    } catch (error) {
+      console.error('Ошибка при получении структуры категорий:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Не удалось загрузить структуру категорий'
+      });
+    }
+  },
+
+  // Получить подкатегории для конкретной категории
+  async getSubCategories(req, res) {
+    try {
+      const { category } = req.params;
+      const { lang = 'ru' } = req.query;
+      const subCategories = await menuService.getSubCategoriesByCategory(category, lang);
+      
+      res.json({
+        success: true,
+        data: subCategories
+      });
+    } catch (error) {
+      console.error('Ошибка при получении подкатегорий:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Не удалось загрузить подкатегории'
+      });
+    }
   }
 };
 
