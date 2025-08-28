@@ -31,18 +31,27 @@ class MenuService {
         // Маппинг по новой структуре: id, category, sub_category, sub_category_en, sub_category_sr, title, title_en, title_sr, description, description_en, description_sr, price, image, available, ingredients, weight, calories
         const idx = (name) => headers.findIndex(h => String(h).toLowerCase().trim() === name.toLowerCase());
 
-        const id = row[idx('id')] ?? row[0] ?? '';
-        const category = row[idx('category')] ?? row[1] ?? '';
+        const id = String(row[idx('id')] ?? row[0] ?? '').trim();
+        let category = String(row[idx('category')] ?? row[1] ?? '').trim();
         
         // Многоязычная поддержка подкатегорий
         let subCategory;
         if (lang === 'en') {
-          subCategory = row[idx('sub_category_en')] ?? row[3] ?? row[idx('sub_category')] ?? row[2] ?? '';
+          subCategory = String(row[idx('sub_category_en')] ?? row[3] ?? row[idx('sub_category')] ?? row[2] ?? '').trim();
         } else if (lang === 'sr') {
-          subCategory = row[idx('sub_category_sr')] ?? row[4] ?? row[idx('sub_category')] ?? row[2] ?? '';
+          subCategory = String(row[idx('sub_category_sr')] ?? row[4] ?? row[idx('sub_category')] ?? row[2] ?? '').trim();
         } else {
           // Русский язык (по умолчанию)
-          subCategory = row[idx('sub_category')] ?? row[2] ?? '';
+          subCategory = String(row[idx('sub_category')] ?? row[2] ?? '').trim();
+        }
+        
+        // Если категория пустая, используем подкатегорию как категорию для некоторых случаев
+        if (!category && subCategory) {
+          const standaloneCategories = ['Свинина', 'Хачапури на углях', 'Закуски', 'Салаты', 'Основные блюда', 'Яичница', 'Хинкали', 'Супы'];
+          if (standaloneCategories.includes(subCategory)) {
+            category = subCategory;
+            subCategory = '';
+          }
         }
         
         // Многоязычная поддержка названий и описаний
@@ -67,16 +76,16 @@ class MenuService {
         const caloriesRaw = row[idx('calories')] ?? row[16] ?? '';
 
         const item = {
-          id: String(id || ''),
-          name: String(title || ''),
-          description: String(description || ''),
+          id: id,
+          name: String(title || '').trim(),
+          description: String(description || '').trim(),
           price: parseFloat(priceRaw) || 0,
-          category: String(category || ''),
-          subCategory: String(subCategory || ''),
-          image: String(image || ''),
+          category: category,
+          subCategory: subCategory,
+          image: String(image || '').trim(),
           available: !availableVal || String(availableVal).toLowerCase() === 'true' || String(availableVal) === '1' || String(availableVal).toLowerCase() === 'да',
           ingredients: ingredientsStr ? String(ingredientsStr).split(',').map(i => i.trim()).filter(Boolean) : [],
-          weight: String(weight || ''),
+          weight: String(weight || '').trim(),
           calories: parseInt(caloriesRaw) || 0
         };
 
@@ -101,7 +110,7 @@ class MenuService {
   async getItemsByCategory(category, lang = 'ru') {
     const items = await this.getAllItems(lang);
     return items.filter(item => 
-      item.category.toLowerCase() === category.toLowerCase() && item.available
+      item.category && item.category.trim().toLowerCase() === category.trim().toLowerCase() && item.available
     );
   }
 
@@ -109,7 +118,7 @@ class MenuService {
   async getItemsBySubCategory(subCategory, lang = 'ru') {
     const items = await this.getAllItems(lang);
     return items.filter(item => 
-      item.subCategory.toLowerCase() === subCategory.toLowerCase() && item.available
+      item.subCategory && item.subCategory.trim().toLowerCase() === subCategory.trim().toLowerCase() && item.available
     );
   }
 
@@ -119,10 +128,10 @@ class MenuService {
     const categories = {};
 
     items.forEach(item => {
-      if (!item.available) return;
+      if (!item.available || !item.category || item.category.trim() === '') return;
       
-      const category = item.category;
-      const subCategory = item.subCategory;
+      const category = item.category.trim();
+      const subCategory = item.subCategory ? item.subCategory.trim() : '';
       
       if (!categories[category]) {
         categories[category] = {
@@ -151,9 +160,9 @@ class MenuService {
 
     items.forEach(item => {
       if (item.available && 
-          item.category.toLowerCase() === category.toLowerCase() && 
-          item.subCategory) {
-        subCategories.add(item.subCategory);
+          item.category && item.category.trim().toLowerCase() === category.trim().toLowerCase() && 
+          item.subCategory && item.subCategory.trim()) {
+        subCategories.add(item.subCategory.trim());
       }
     });
 
