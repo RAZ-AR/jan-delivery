@@ -59,11 +59,16 @@ class App {
           }
         }, 100);
         
-        // Таймаут на 5 секунд
+        // Таймаут на 2 секунды для быстрого развертывания в браузере
         setTimeout(() => {
           clearInterval(checkInterval);
-          resolve(); // Продолжаем даже если Telegram не готов
-        }, 5000);
+          utils.log('Telegram WebApp timeout - продолжаем в режиме отладки');
+          // Принудительно активируем mock режим если он еще не активен
+          if (!telegram.isWebAppReady()) {
+            telegram.mockTelegramForDevelopment();
+          }
+          resolve();
+        }, 2000);
       }
     });
   }

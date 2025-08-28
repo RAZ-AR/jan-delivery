@@ -43,60 +43,58 @@ class TelegramWebApp {
   }
 
   mockTelegramForDevelopment() {
-    if (CONFIG.DEBUG) {
-      utils.log('Режим разработки: создание mock Telegram WebApp');
-      
-      this.user = {
-        id: 123456789,
-        first_name: 'Тест',
-        last_name: 'Пользователь',
-        username: 'testuser',
-        language_code: 'ru'
-      };
-      
-      this.tg = {
-        ready: () => {},
-        expand: () => {},
-        close: () => window.close(),
-        MainButton: {
-          text: '',
-          show: () => {},
-          hide: () => {},
-          enable: () => {},
-          disable: () => {},
-          setText: (text) => { this.tg.MainButton.text = text; },
-          onClick: (callback) => { this.tg.MainButton.callback = callback; },
-          offClick: () => {},
-          showProgress: () => {},
-          hideProgress: () => {}
-        },
-        BackButton: {
-          show: () => {},
-          hide: () => {},
-          onClick: (callback) => { this.tg.BackButton.callback = callback; },
-          offClick: () => {}
-        },
-        HapticFeedback: {
-          impactOccurred: (style) => {},
-          notificationOccurred: (type) => {},
-          selectionChanged: () => {}
-        },
-        showPopup: (params, callback) => {
-          const result = confirm(params.message);
-          if (callback) callback(result ? 'ok' : 'cancel');
-        },
-        showAlert: (message, callback) => {
-          alert(message);
-          if (callback) callback();
-        },
-        showConfirm: (message, callback) => {
-          const result = confirm(message);
-          if (callback) callback(result);
-        }
-      };
-      
-      this.isReady = true;
-    }
+    utils.log('Режим разработки: создание mock Telegram WebApp');
+    
+    this.user = {
+      id: 123456789,
+      first_name: 'Тест',
+      last_name: 'Пользователь',
+      username: 'testuser',
+      language_code: 'ru'
+    };
+    
+    this.tg = {
+      ready: () => {},
+      expand: () => {},
+      close: () => window.close(),
+      MainButton: {
+        text: '',
+        show: () => {},
+        hide: () => {},
+        enable: () => {},
+        disable: () => {},
+        setText: (text) => { this.tg.MainButton.text = text; },
+        onClick: (callback) => { this.tg.MainButton.callback = callback; },
+        offClick: () => {},
+        showProgress: () => {},
+        hideProgress: () => {}
+      },
+      BackButton: {
+        show: () => {},
+        hide: () => {},
+        onClick: (callback) => { this.tg.BackButton.callback = callback; },
+        offClick: () => {}
+      },
+      HapticFeedback: {
+        impactOccurred: (style) => {},
+        notificationOccurred: (type) => {},
+        selectionChanged: () => {}
+      },
+      showPopup: (params, callback) => {
+        const result = confirm(params.message);
+        if (callback) callback(result ? 'ok' : 'cancel');
+      },
+      showAlert: (message, callback) => {
+        alert(message);
+        if (callback) callback();
+      },
+      showConfirm: (message, callback) => {
+        const result = confirm(message);
+        if (callback) callback(result);
+      }
+    };
+    
+    this.isReady = true;
   }
 
   applyTheme() {

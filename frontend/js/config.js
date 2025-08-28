@@ -60,8 +60,8 @@ const CONFIG = {
   // Phone number validation (международный формат)
   PHONE_REGEX: /^(\+\d{1,4})?\d{7,14}$/,
 
-  // Development mode
-  DEBUG: window.location.hostname === 'localhost'
+  // Development mode - enable for GitHub Pages testing
+  DEBUG: window.location.hostname === 'localhost' || window.location.hostname.includes('github.io')
 };
 
 // Helper functions
