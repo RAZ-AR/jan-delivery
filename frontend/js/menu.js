@@ -88,26 +88,47 @@ class MenuManager {
       utils.log('Меню загружено:', this.menu.length, 'блюд', language ? `(${language})` : '');
     } catch (error) {
       utils.logError('Ошибка загрузки меню:', error);
-      utils.showToast('Ошибка загрузки меню', 'error');
-      this.showError();
+      utils.showToast('Ошибка загрузки меню, попробуем загрузить базовую версию', 'warning');
+      
+      // Попытка загрузить только меню без категорий
+      try {
+        const menuData = await api.getMenu(language);
+        if (menuData && menuData.length > 0) {
+          this.menu = menuData;
+          this.extractCategories();
+          this.renderCategories();
+          this.renderMenu();
+          utils.showToast('Меню загружено в упрощенном режиме', 'info');
+        } else {
+          this.showError();
+        }
+      } catch (fallbackError) {
+        utils.logError('Критическая ошибка загрузки:', fallbackError);
+        this.showError();
+      }
     } finally {
       this.isLoading = false;
       this.hideLoading();
     }
   }
 
-  // Извлечь категории из меню
+  // Извлечь категории из структуры категорий
   extractCategories() {
-    const categorySet = new Set();
-    
-    this.menu.forEach(item => {
-      if (item.category && item.available) {
-        categorySet.add(item.category.toLowerCase());
-      }
-    });
-
-    this.categories = Array.from(categorySet).sort();
-    utils.log('Найдены категории:', this.categories);
+    // Используем структуру категорий из API, а не извлекаем из меню
+    if (this.categoriesStructure && Object.keys(this.categoriesStructure).length > 0) {
+      this.categories = Object.keys(this.categoriesStructure).filter(cat => cat.trim() !== '');
+      utils.log('Найдены категории из структуры:', this.categories);
+    } else {
+      // Fallback: извлекаем из меню
+      const categorySet = new Set();
+      this.menu.forEach(item => {
+        if (item.category && item.category.trim() && item.available) {
+          categorySet.add(item.category);
+        }
+      });
+      this.categories = Array.from(categorySet).sort();
+      utils.log('Найдены категории из меню (fallback):', this.categories);
+    }
   }
 
   // Отрендерить категории
@@ -308,8 +329,8 @@ class MenuManager {
       // Если выбраны "Все" категории
       if (this.currentCategory === 'all') return true;
       
-      // Фильтр по категории
-      if (item.category.toLowerCase() !== this.currentCategory.toLowerCase()) {
+      // Фильтр по категории (точное совпадение)
+      if (item.category !== this.currentCategory) {
         return false;
       }
       
@@ -317,7 +338,7 @@ class MenuManager {
       if (!this.currentSubCategory) return true;
       
       // Фильтр по подкатегории
-      return item.subCategory.toLowerCase() === this.currentSubCategory.toLowerCase();
+      return item.subCategory === this.currentSubCategory;
     });
   }
 

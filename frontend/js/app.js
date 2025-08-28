@@ -10,6 +10,12 @@ class App {
   async init() {
     utils.log('Инициализация приложения...');
 
+    // Принудительный таймаут для инициализации
+    const initTimeout = setTimeout(() => {
+      utils.logError('Инициализация занимает слишком много времени, принудительно показываем меню');
+      this.forceShowMenu();
+    }, 10000); // 10 секунд
+
     try {
       // Инициализация i18n
       await window.i18n.init();
@@ -38,13 +44,49 @@ class App {
       // Скрыть экран загрузки
       this.hideLoadingScreen();
       
+      // Очистить таймаут инициализации
+      clearTimeout(initTimeout);
+      
       this.isInitialized = true;
       utils.log('Приложение инициализировано');
       
     } catch (error) {
+      clearTimeout(initTimeout);
       utils.logError('Ошибка инициализации:', error);
-      this.showInitError(error);
+      utils.showToast('Ошибка инициализации, но показываем меню', 'warning');
+      
+      // Принудительно показываем интерфейс даже при ошибке
+      try {
+        await this.forceShowMenu();
+      } catch (menuError) {
+        utils.logError('Критическая ошибка:', menuError);
+        this.showInitError(error);
+      }
     }
+  }
+
+  // Принудительно показать меню даже при ошибках инициализации
+  async forceShowMenu() {
+    utils.log('Принудительное отображение меню...');
+    
+    // Инициализируем элементы
+    this.initElements();
+    
+    // Показываем интерфейс
+    this.showMainInterface();
+    this.hideLoadingScreen();
+    
+    // Принудительно загружаем меню
+    if (window.menuManager) {
+      await window.menuManager.loadMenu();
+    }
+    
+    // Обновляем корзину
+    if (window.cart) {
+      window.cart.updateCartDisplay();
+    }
+    
+    utils.showToast('Меню загружено в аварийном режиме', 'success');
   }
 
   async waitForTelegram() {
