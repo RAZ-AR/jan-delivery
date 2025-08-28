@@ -665,6 +665,42 @@ class CartManager {
     div.textContent = text;
     return div.innerHTML;
   }
+
+  // Обновить названия товаров в корзине при смене языка
+  async updateItemNames(language) {
+    if (this.items.length === 0) return;
+
+    console.log(`Обновляем названия товаров в корзине для языка: ${language}`);
+
+    try {
+      // Загружаем обновленные данные для всех товаров в корзине
+      const itemIds = this.items.map(item => item.id);
+      const updatedItems = [];
+
+      for (const itemId of itemIds) {
+        const updatedItem = await api.getMenuItem(itemId, language);
+        if (updatedItem) {
+          updatedItems.push(updatedItem);
+        }
+      }
+
+      // Обновляем названия и описания в корзине, сохраняя количество
+      this.items.forEach(cartItem => {
+        const updatedItem = updatedItems.find(item => item.id === cartItem.id);
+        if (updatedItem) {
+          cartItem.name = updatedItem.name;
+          cartItem.description = updatedItem.description;
+        }
+      });
+
+      // Перерендерим корзину с новыми названиями
+      this.renderCart();
+      this.saveCartToStorage();
+
+    } catch (error) {
+      console.error('Ошибка обновления названий в корзине:', error);
+    }
+  }
 }
 
 // Создать глобальный экземпляр

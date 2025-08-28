@@ -339,10 +339,23 @@ class App {
   }
 
   // Обновление динамического контента при смене языка
-  updateDynamicContent(language) {
-    // Обновляем категории меню
+  async updateDynamicContent(language) {
+    console.log(`Обновление контента для языка: ${language}`);
+
+    // Перезагружаем меню с новым языком
     if (window.menuManager) {
+      await window.menuManager.loadMenu(language);
       window.menuManager.updateCategoryButtons();
+    }
+
+    // Обновляем корзину с новыми названиями
+    if (window.cartManager) {
+      await window.cartManager.updateItemNames(language);
+    }
+
+    // Обновляем заказы с новыми названиями
+    if (window.ordersManager) {
+      await window.ordersManager.updateOrdersDisplay(language);
     }
 
     // Обновляем форматирование валют

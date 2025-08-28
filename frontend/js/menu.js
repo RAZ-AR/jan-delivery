@@ -50,19 +50,19 @@ class MenuManager {
   }
 
   // Загрузить меню
-  async loadMenu() {
+  async loadMenu(language = null) {
     if (this.isLoading) return;
 
     this.isLoading = true;
     this.showLoading();
 
     try {
-      this.menu = await api.getMenu();
+      this.menu = await api.getMenu(language);
       this.extractCategories();
       this.renderCategories();
       this.renderMenu();
       
-      utils.log('Меню загружено:', this.menu.length, 'блюд');
+      utils.log('Меню загружено:', this.menu.length, 'блюд', language ? `(${language})` : '');
     } catch (error) {
       utils.logError('Ошибка загрузки меню:', error);
       utils.showToast('Ошибка загрузки меню', 'error');
@@ -92,17 +92,69 @@ class MenuManager {
     if (!this.categoriesFilter) return;
 
     const buttons = ['all', ...this.categories].map(category => {
-      const name = category === 'all' ? 'Все' : this.capitalizeFirst(category);
+      const name = this.getCategoryName(category);
       const active = category === this.currentCategory ? 'active' : '';
       
       return `
-        <button class="category-btn ${active}" data-category="${category}">
+        <button class="category-btn ${active}" data-category="${category}" data-i18n="${this.getCategoryI18nKey(category)}">
           ${name}
         </button>
       `;
     }).join('');
 
     this.categoriesFilter.innerHTML = buttons;
+  }
+
+  // Получить переведенное название категории
+  getCategoryName(category) {
+    if (category === 'all') {
+      return window.i18n ? window.i18n.t('menu.categories.all') : 'Все';
+    }
+
+    // Маппинг категорий на ключи переводов
+    const categoryKeys = {
+      'шашлык': 'menu.categories.shashlik',
+      'люля-кебаб': 'menu.categories.kebab', 
+      'рыба': 'menu.categories.fish',
+      'овощи': 'menu.categories.vegetables',
+      'соусы': 'menu.categories.sauces',
+      'салаты': 'menu.categories.salads'
+    };
+
+    const key = categoryKeys[category.toLowerCase()];
+    if (key && window.i18n) {
+      return window.i18n.t(key);
+    }
+
+    return this.capitalizeFirst(category);
+  }
+
+  // Получить i18n ключ для категории
+  getCategoryI18nKey(category) {
+    if (category === 'all') return 'menu.categories.all';
+    
+    const categoryKeys = {
+      'шашлык': 'menu.categories.shashlik',
+      'люля-кебаб': 'menu.categories.kebab',
+      'рыба': 'menu.categories.fish', 
+      'овощи': 'menu.categories.vegetables',
+      'соусы': 'menu.categories.sauces',
+      'салаты': 'menu.categories.salads'
+    };
+
+    return categoryKeys[category.toLowerCase()] || '';
+  }
+
+  // Обновить кнопки категорий (для смены языка)
+  updateCategoryButtons() {
+    const buttons = this.categoriesFilter?.querySelectorAll('.category-btn');
+    if (!buttons) return;
+
+    buttons.forEach(btn => {
+      const category = btn.dataset.category;
+      const newName = this.getCategoryName(category);
+      btn.textContent = newName;
+    });
   }
 
   // Отрендерить меню

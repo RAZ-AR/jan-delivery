@@ -285,6 +285,17 @@ ${order.estimatedDelivery ? `⏱️ Ожидаемое время: ${order.estim
     div.textContent = text;
     return div.innerHTML;
   }
+
+  // Обновить отображение заказов при смене языка
+  async updateOrdersDisplay(language) {
+    if (this.orders.length === 0) return;
+
+    console.log(`Обновляем отображение заказов для языка: ${language}`);
+
+    // Пока просто перерендериваем с новыми переводами статусов
+    // В будущем можно будет обновлять названия блюд в заказах
+    this.renderOrders();
+  }
 }
 
 // Создать глобальный экземпляр

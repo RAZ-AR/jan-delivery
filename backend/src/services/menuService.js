@@ -28,32 +28,32 @@ class MenuService {
         const row = data[i];
         if (row.length === 0 || !row[0]) continue; // Пропустить пустые строки
 
-        // Гибкое сопоставление по заголовкам с поддержкой многоязычности
-        const idx = (name) => headers.findIndex(h => String(h).toLowerCase() === name);
+        // Маппинг по вашей структуре: id, title, title_en, title_sr, description, description_en, description_sr, price, category, image, available, ingredients, weight, calories
+        const idx = (name) => headers.findIndex(h => String(h).toLowerCase().trim() === name.toLowerCase());
 
-        const id = row[idx('id')] ?? row[0];
-        const category = row[idx('category')] ?? row[4] ?? '';
+        const id = row[idx('id')] ?? row[0] ?? '';
+        const category = row[idx('category')] ?? row[8] ?? '';
         
-        // Многоязычная поддержка названий и описаний
+        // Многоязычная поддержка названий и описаний согласно вашей структуре
         let title, description;
         if (lang === 'en') {
-          title = row[idx('title_en')] ?? row[idx('name_en')] ?? row[idx('title')] ?? row[1] ?? '';
-          description = row[idx('description_en')] ?? row[idx('description')] ?? row[2] ?? '';
+          title = row[idx('title_en')] ?? row[2] ?? row[idx('title')] ?? row[1] ?? '';
+          description = row[idx('description_en')] ?? row[5] ?? row[idx('description')] ?? row[4] ?? '';
         } else if (lang === 'sr') {
-          title = row[idx('title_sr')] ?? row[idx('name_sr')] ?? row[idx('title')] ?? row[1] ?? '';
-          description = row[idx('description_sr')] ?? row[idx('description')] ?? row[2] ?? '';
+          title = row[idx('title_sr')] ?? row[3] ?? row[idx('title')] ?? row[1] ?? '';
+          description = row[idx('description_sr')] ?? row[6] ?? row[idx('description')] ?? row[4] ?? '';
         } else {
-          title = row[idx('title')] ?? row[idx('name')] ?? row[1] ?? '';
-          description = row[idx('description')] ?? row[2] ?? '';
+          // Русский язык (по умолчанию)
+          title = row[idx('title')] ?? row[1] ?? '';
+          description = row[idx('description')] ?? row[4] ?? '';
         }
         
-        const weight = row[idx('weight')] ?? row[8] ?? '';
-        const priceRaw = row[idx('price')] ?? row[3] ?? '0';
-        const image = row[idx('image')] ?? row[5] ?? '';
-
-        const ingredientsStr = row[idx('ingredients')] ?? row[7] ?? '';
-        const caloriesRaw = row[idx('calories')] ?? row[9] ?? '';
-        const availableVal = row[idx('available')] ?? row[6] ?? 'TRUE';
+        const priceRaw = row[idx('price')] ?? row[7] ?? '0';
+        const image = row[idx('image')] ?? row[9] ?? '';
+        const availableVal = row[idx('available')] ?? row[10] ?? 'TRUE';
+        const ingredientsStr = row[idx('ingredients')] ?? row[11] ?? '';
+        const weight = row[idx('weight')] ?? row[12] ?? '';
+        const caloriesRaw = row[idx('calories')] ?? row[13] ?? '';
 
         const item = {
           id: String(id || ''),

@@ -41,6 +41,12 @@ class I18n {
         
         this.currentLanguage = lang;
         localStorage.setItem('jan-delivery-language', lang);
+        
+        // Очищаем кэш API при смене языка
+        if (window.api) {
+            window.api.clearCache();
+        }
+        
         this.updateUI();
         
         // Уведомляем об изменении языка
