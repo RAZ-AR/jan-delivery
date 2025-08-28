@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAN Delivery - Test New Data</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="jan-api-base" content="http://localhost:3001">
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><img src="assets/images/jan logo.svg" alt="JAN Delivery" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                    <span class="logo-fallback" style="display:none;">🍕</span> JAN Delivery - NEW DATA</h1>
+                <div class="user-info">
+                    <span id="user-name">Пользователь</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <!-- Language Switcher -->
+                <div class="language-selector">
+                    <button class="language-btn active" data-lang="ru" title="Русский">RU</button>
+                    <button class="language-btn" data-lang="en" title="English">EN</button>
+                    <button class="language-btn" data-lang="sr" title="Српски">SR</button>
+                </div>
+                <div class="cart-indicator" id="cart-indicator">
+                    <span class="cart-icon">🛒</span>
+                    <span class="cart-count" id="cart-count">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <button class="nav-btn active" data-page="menu">🍽️ Меню</button>
+            <button class="nav-btn" data-page="cart">🛒 Корзина</button>
+            <button class="nav-btn" data-page="orders">📦 Заказы</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Menu Page -->
+            <div id="menu-page" class="page active">
+                <div class="categories-filter" id="categories-filter">
+                    <button class="category-btn active" data-category="all">Все</button>
+                </div>
+                <div class="subcategories-filter" id="subcategories-filter" style="display:none;"></div>
+                <div id="menu-items" class="menu-grid">
+                    <div style="text-align: center; padding: 50px; color: #666;">
+                        Загружаем меню из новой таблицы...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Page -->
+            <div id="cart-page" class="page" style="display: none;">
+                <div class="cart-header">
+                    <h2>Ваша корзина</h2>
+                    <button id="clear-cart" class="clear-btn">Очистить</button>
+                </div>
+                <div id="cart-items" class="cart-items"></div>
+                <div id="cart-summary" class="cart-summary hidden">
+                    <div class="summary-row">
+                        <span>Сумма заказа:</span>
+                        <span id="subtotal">0₽</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Доставка:</span>
+                        <span id="delivery-cost">200₽</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Итого:</span>
+                        <span id="total">0₽</span>
+                    </div>
+                    <button id="checkout-btn" class="checkout-btn">Оформить заказ</button>
+                </div>
+                <div id="cart-empty" class="cart-empty">
+                    <div class="empty-icon">🛒</div>
+                    <h3>Корзина пуста</h3>
+                    <p>Добавьте блюда из меню</p>
+                    <button class="nav-to-menu">Перейти к меню</button>
+                </div>
+            </div>
+
+            <!-- Orders Page -->
+            <div id="orders-page" class="page" style="display: none;">
+                <h2>Мои заказы</h2>
+                <div class="orders-empty">
+                    <div class="empty-icon">📦</div>
+                    <h3>Заказов пока нет</h3>
+                    <p>Сделайте первый заказ из нашего меню</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    console.log('=== JAN DELIVERY NEW DATA TEST ===');
+    
+    const API_BASE = 'http://localhost:3001';
+    let menu = [];
+    let categoriesData = {};
+    let cart = [];
+    let currentLanguage = 'ru';
+    let currentCategory = 'all';
+    let currentSubCategory = null;
+
+    // Простые утилиты
+    function log(message) {
+        console.log('[JAN-NEW]', message);
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: ${type === 'error' ? '#f56565' : type === 'success' ? '#48bb78' : '#3390ec'}; 
+            color: white; padding: 12px 20px; border-radius: 8px; z-index: 10000; font-size: 14px;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Основная загрузка
+    async function initApp() {
+        log('Инициализация приложения с новыми данными...');
+        
+        try {
+            // Загружаем меню и категории
+            await loadMenu();
+            await loadCategories();
+            
+            // Настраиваем события
+            setupEvents();
+            
+            // Рендерим интерфейс
+            renderCategories();
+            renderMenu();
+            
+            log(`Приложение готово! Загружено ${menu.length} блюд`);
+            showToast(`Новое меню загружено! ${menu.length} блюд`, 'success');
+            
+        } catch (error) {
+            log('Ошибка инициализации: ' + error.message);
+            showToast('Ошибка загрузки: ' + error.message, 'error');
+            
+            document.getElementById('menu-items').innerHTML = `
+                <div style="text-align: center; padding: 50px; color: red;">
+                    Ошибка загрузки меню: ${error.message}
+                    <br><button onclick="initApp()" style="margin-top: 20px; padding: 10px 20px;">Попробовать снова</button>
+                </div>
+            `;
+        }
+    }
+
+    // Загрузка меню
+    async function loadMenu() {
+        log('Загружаем меню...');
+        const response = await fetch(`${API_BASE}/api/menu?lang=${currentLanguage}&_t=${Date.now()}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.data) {
+            throw new Error('Некорректный ответ API');
+        }
+        
+        menu = data.data;
+        log(`Меню загружено: ${menu.length} блюд`);
+        
+        // Показать детали первого блюда для отладки
+        if (menu.length > 0) {
+            log('Пример блюда:', menu[0]);
+        }
+    }
+
+    // Загрузка категорий
+    async function loadCategories() {
+        log('Загружаем категории...');
+        
+        try {
+            const response = await fetch(`${API_BASE}/api/menu/categories?lang=${currentLanguage}&_t=${Date.now()}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    categoriesData = data.data;
+                    log(`Категории загружены: ${Object.keys(categoriesData).length}`);
+                    log('Список категорий:', Object.keys(categoriesData));
+                }
+            }
+        } catch (error) {
+            log('Ошибка загрузки категорий: ' + error.message);
+        }
+    }
+
+    // Настройка событий
+    function setupEvents() {
+        // Навигация
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = btn.dataset.page;
+                showPage(page);
+            });
+        });
+
+        // Категории
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('category-btn')) {
+                selectCategory(e.target.dataset.category);
+            } else if (e.target.classList.contains('subcategory-btn')) {
+                selectSubCategory(e.target.dataset.subcategory);
+            } else if (e.target.classList.contains('add-to-cart')) {
+                const itemId = e.target.closest('.menu-item').dataset.itemId;
+                addToCart(itemId);
+            }
+        });
+
+        // Языки
+        document.querySelectorAll('.language-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchLanguage(btn.dataset.lang);
+            });
+        });
+    }
+
+    // Переключение страниц
+    function showPage(pageName) {
+        document.querySelectorAll('.nav-btn').forEach(btn => 
+            btn.classList.toggle('active', btn.dataset.page === pageName));
+        
+        document.querySelectorAll('.page').forEach(page => 
+            page.style.display = 'none');
+        
+        document.getElementById(`${pageName}-page`).style.display = 'block';
+    }
+
+    // Переключение языка
+    async function switchLanguage(lang) {
+        currentLanguage = lang;
+        
+        document.querySelectorAll('.language-btn').forEach(btn => 
+            btn.classList.toggle('active', btn.dataset.lang === lang));
+        
+        showToast('Переключаем язык...', 'info');
+        
+        try {
+            await loadMenu();
+            await loadCategories();
+            renderCategories();
+            renderMenu();
+            showToast(`Язык переключен! ${menu.length} блюд`, 'success');
+        } catch (error) {
+            showToast('Ошибка переключения языка', 'error');
+        }
+    }
+
+    // Выбор категории
+    function selectCategory(category) {
+        currentCategory = category;
+        currentSubCategory = null;
+        
+        // Обновляем активную кнопку
+        document.querySelectorAll('.category-btn').forEach(btn => 
+            btn.classList.toggle('active', btn.dataset.category === category));
+        
+        // Показываем подкатегории
+        if (category !== 'all' && categoriesData[category] && categoriesData[category].subCategories.length > 0) {
+            renderSubCategories(categoriesData[category].subCategories);
+        } else {
+            hideSubCategories();
+        }
+        
+        renderMenu();
+    }
+
+    // Выбор подкатегории
+    function selectSubCategory(subCategory) {
+        currentSubCategory = subCategory === 'all' ? null : subCategory;
+        
+        // Обновляем активную кнопку
+        document.querySelectorAll('.subcategory-btn').forEach(btn => 
+            btn.classList.toggle('active', btn.dataset.subcategory === subCategory));
+        
+        renderMenu();
+    }
+
+    // Рендер категорий
+    function renderCategories() {
+        const container = document.getElementById('categories-filter');
+        const categories = Object.keys(categoriesData).filter(cat => cat.trim() !== '');
+        
+        const buttons = [
+            '<button class="category-btn active" data-category="all">Все</button>',
+            ...categories.map(cat => 
+                `<button class="category-btn" data-category="${cat}">${cat}</button>`)
+        ];
+        
+        container.innerHTML = buttons.join('');
+    }
+
+    // Рендер подкатегорий
+    function renderSubCategories(subCategories) {
+        const container = document.getElementById('subcategories-filter');
+        
+        const buttons = [
+            '<button class="subcategory-btn active" data-subcategory="all">Все</button>',
+            ...subCategories.map(sub => 
+                `<button class="subcategory-btn" data-subcategory="${sub}">${sub}</button>`)
+        ];
+        
+        container.innerHTML = buttons.join('');
+        container.style.display = 'flex';
+    }
+
+    // Скрыть подкатегории
+    function hideSubCategories() {
+        document.getElementById('subcategories-filter').style.display = 'none';
+    }
+
+    // Рендер меню
+    function renderMenu() {
+        const container = document.getElementById('menu-items');
+        
+        // Фильтрация
+        let filteredMenu = menu.filter(item => item.available);
+        
+        if (currentCategory !== 'all') {
+            filteredMenu = filteredMenu.filter(item => item.category === currentCategory);
+        }
+        
+        if (currentSubCategory) {
+            filteredMenu = filteredMenu.filter(item => item.subCategory === currentSubCategory);
+        }
+        
+        if (filteredMenu.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">В этой категории блюд нет</div>';
+            return;
+        }
+        
+        // Рендер блюд
+        container.innerHTML = filteredMenu.map(item => `
+            <div class="menu-item" data-item-id="${item.id}">
+                <div class="menu-item-content">
+                    <h3>${item.name}</h3>
+                    <p class="category">${item.category}${item.subCategory ? ` › ${item.subCategory}` : ''}</p>
+                    ${item.description ? `<p class="description">${item.description}</p>` : ''}
+                    <div class="menu-item-footer">
+                        <span class="price">${item.price} RSD</span>
+                        ${item.weight ? `<span class="weight">${item.weight}</span>` : ''}
+                        <button class="add-to-cart">+</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        log(`Отображено ${filteredMenu.length} блюд в категории "${currentCategory}"`);
+    }
+
+    // Добавление в корзину
+    function addToCart(itemId) {
+        const item = menu.find(i => i.id === itemId);
+        if (!item) return;
+        
+        const existingItem = cart.find(c => c.id === itemId);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cart.push({ ...item, quantity: 1 });
+        }
+        
+        updateCartCounter();
+        showToast(`${item.name} добавлено в корзину`, 'success');
+    }
+
+    // Обновление счетчика корзины
+    function updateCartCounter() {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        document.getElementById('cart-count').textContent = totalItems;
+        document.getElementById('cart-indicator').style.display = totalItems > 0 ? 'flex' : 'none';
+    }
+
+    // Запуск приложения
+    log('Запуск приложения с тестом новых данных...');
+    initApp();
+    </script>
+</body>
+</html>
