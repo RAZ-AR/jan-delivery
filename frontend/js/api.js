@@ -108,9 +108,12 @@ class ApiService {
   // Методы для работы с конкретными API
 
   // Получить меню
-  async getMenu() {
+  async getMenu(lang = null) {
     try {
-      const response = await this.get(CONFIG.ENDPOINTS.MENU);
+      // Используем текущий язык если не указан
+      const language = lang || (window.i18n ? window.i18n.getCurrentLanguage() : 'ru');
+      const endpoint = `${CONFIG.ENDPOINTS.MENU}?lang=${language}`;
+      const response = await this.get(endpoint);
       return response.success ? response.data : [];
     } catch (error) {
       utils.logError('Ошибка загрузки меню:', error);
@@ -119,9 +122,11 @@ class ApiService {
   }
 
   // Получить блюдо по ID
-  async getMenuItem(id) {
+  async getMenuItem(id, lang = null) {
     try {
-      const response = await this.get(`${CONFIG.ENDPOINTS.MENU}/${id}`);
+      const language = lang || (window.i18n ? window.i18n.getCurrentLanguage() : 'ru');
+      const endpoint = `${CONFIG.ENDPOINTS.MENU}/${id}?lang=${language}`;
+      const response = await this.get(endpoint);
       return response.success ? response.data : null;
     } catch (error) {
       utils.logError('Ошибка загрузки блюда:', error);
@@ -130,9 +135,11 @@ class ApiService {
   }
 
   // Получить меню по категории
-  async getMenuByCategory(category) {
+  async getMenuByCategory(category, lang = null) {
     try {
-      const response = await this.get(`${CONFIG.ENDPOINTS.MENU}/category/${category}`);
+      const language = lang || (window.i18n ? window.i18n.getCurrentLanguage() : 'ru');
+      const endpoint = `${CONFIG.ENDPOINTS.MENU}/category/${category}?lang=${language}`;
+      const response = await this.get(endpoint);
       return response.success ? response.data : [];
     } catch (error) {
       utils.logError('Ошибка загрузки категории:', error);

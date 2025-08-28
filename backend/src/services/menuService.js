@@ -8,8 +8,9 @@ class MenuService {
   }
 
   // Получить все блюда из меню
-  async getAllItems() {
-    const cached = this.cache.get('menu');
+  async getAllItems(lang = 'ru') {
+    const cacheKey = `menu-${lang}`;
+    const cached = this.cache.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -27,18 +28,29 @@ class MenuService {
         const row = data[i];
         if (row.length === 0 || !row[0]) continue; // Пропустить пустые строки
 
-        // Гибкое сопоставление по заголовкам, чтобы поддержать
-        // структуру: id, category, title, weight, price, image
+        // Гибкое сопоставление по заголовкам с поддержкой многоязычности
         const idx = (name) => headers.findIndex(h => String(h).toLowerCase() === name);
 
         const id = row[idx('id')] ?? row[0];
         const category = row[idx('category')] ?? row[4] ?? '';
-        const title = row[idx('title')] ?? row[1] ?? '';
+        
+        // Многоязычная поддержка названий и описаний
+        let title, description;
+        if (lang === 'en') {
+          title = row[idx('title_en')] ?? row[idx('name_en')] ?? row[idx('title')] ?? row[1] ?? '';
+          description = row[idx('description_en')] ?? row[idx('description')] ?? row[2] ?? '';
+        } else if (lang === 'sr') {
+          title = row[idx('title_sr')] ?? row[idx('name_sr')] ?? row[idx('title')] ?? row[1] ?? '';
+          description = row[idx('description_sr')] ?? row[idx('description')] ?? row[2] ?? '';
+        } else {
+          title = row[idx('title')] ?? row[idx('name')] ?? row[1] ?? '';
+          description = row[idx('description')] ?? row[2] ?? '';
+        }
+        
         const weight = row[idx('weight')] ?? row[8] ?? '';
         const priceRaw = row[idx('price')] ?? row[3] ?? '0';
         const image = row[idx('image')] ?? row[5] ?? '';
 
-        const description = row[idx('description')] ?? row[2] ?? '';
         const ingredientsStr = row[idx('ingredients')] ?? row[7] ?? '';
         const caloriesRaw = row[idx('calories')] ?? row[9] ?? '';
         const availableVal = row[idx('available')] ?? row[6] ?? 'TRUE';
@@ -59,23 +71,23 @@ class MenuService {
         items.push(item);
       }
 
-      this.cache.set('menu', items);
+      this.cache.set(cacheKey, items);
       return items;
     } catch (error) {
       console.error('Ошибка загрузки меню:', error);
-      return this.cache.get('menu') || [];
+      return this.cache.get(cacheKey) || [];
     }
   }
 
   // Получить блюдо по ID
-  async getItemById(id) {
-    const items = await this.getAllItems();
+  async getItemById(id, lang = 'ru') {
+    const items = await this.getAllItems(lang);
     return items.find(item => item.id === id);
   }
 
   // Получить блюда по категории
-  async getItemsByCategory(category) {
-    const items = await this.getAllItems();
+  async getItemsByCategory(category, lang = 'ru') {
+    const items = await this.getAllItems(lang);
     return items.filter(item => 
       item.category.toLowerCase() === category.toLowerCase() && item.available
     );
@@ -83,7 +95,10 @@ class MenuService {
 
   // Очистить кэш
   clearCache() {
-    this.cache.del('menu');
+    // Очищаем кэш для всех языков
+    ['ru', 'en', 'sr'].forEach(lang => {
+      this.cache.del(`menu-${lang}`);
+    });
   }
 }
 

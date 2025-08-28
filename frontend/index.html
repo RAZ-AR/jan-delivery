@@ -8,6 +8,8 @@
     <!-- Backend API base URL override for production hosting -->
     <meta name="jan-api-base" content="https://jan-delivery.onrender.com">
     <link rel="stylesheet" href="styles/main.css">
+    <!-- Internationalization -->
+    <script src="js/i18n.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,29 +19,37 @@
         <!-- Loading Screen -->
         <div id="loading-screen" class="loading-screen">
             <div class="loading-spinner"></div>
-            <p>Загружаем вкусное меню...</p>
+            <p data-i18n="app.loading">Загружаем вкусное меню...</p>
         </div>
 
         <!-- Header -->
         <header id="header" class="header hidden">
             <div class="header-content">
                 <h1><img src="assets/images/jan logo.svg" alt="JAN Delivery" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                    <span class="logo-fallback" style="display:none;">🍕</span> JAN Delivery</h1>
+                    <span class="logo-fallback" style="display:none;">🍕</span> <span data-i18n="header.title">JAN Delivery</span></h1>
                 <div class="user-info">
                     <span id="user-name"></span>
                 </div>
             </div>
-            <div class="cart-indicator" id="cart-indicator">
-                <span class="cart-icon">🛒</span>
-                <span class="cart-count" id="cart-count">0</span>
+            <div class="header-actions">
+                <!-- Language Switcher -->
+                <div class="language-selector">
+                    <button class="language-btn active" data-lang="ru" title="Русский">RU</button>
+                    <button class="language-btn" data-lang="en" title="English">EN</button>
+                    <button class="language-btn" data-lang="sr" title="Српски">SR</button>
+                </div>
+                <div class="cart-indicator" id="cart-indicator">
+                    <span class="cart-icon">🛒</span>
+                    <span class="cart-count" id="cart-count">0</span>
+                </div>
             </div>
         </header>
 
         <!-- Navigation -->
         <nav id="nav" class="nav hidden">
-            <button class="nav-btn active" data-page="menu">🍽️ Меню</button>
-            <button class="nav-btn" data-page="cart">🛒 Корзина</button>
-            <button class="nav-btn" data-page="orders">📦 Заказы</button>
+            <button class="nav-btn active" data-page="menu" data-i18n="nav.menu">🍽️ Меню</button>
+            <button class="nav-btn" data-page="cart" data-i18n="nav.cart">🛒 Корзина</button>
+            <button class="nav-btn" data-page="orders" data-i18n="nav.orders">📦 Заказы</button>
         </nav>
 
         <!-- Main Content -->
@@ -47,7 +57,7 @@
             <!-- Menu Page -->
             <div id="menu-page" class="page active">
                 <div class="categories-filter">
-                    <button class="category-btn active" data-category="all">Все</button>
+                    <button class="category-btn active" data-category="all" data-i18n="menu.categories.all">Все</button>
                 </div>
                 <div id="menu-items" class="menu-grid">
                     <!-- Menu items will be loaded here -->
@@ -57,45 +67,45 @@
             <!-- Cart Page -->
             <div id="cart-page" class="page">
                 <div class="cart-header">
-                    <h2>Ваша корзина</h2>
-                    <button id="clear-cart" class="clear-btn">Очистить</button>
+                    <h2 data-i18n="cart.title">Ваша корзина</h2>
+                    <button id="clear-cart" class="clear-btn" data-i18n="cart.clear">Очистить</button>
                 </div>
                 <div id="cart-items" class="cart-items">
                     <!-- Cart items will be loaded here -->
                 </div>
                 <div id="cart-summary" class="cart-summary hidden">
                     <div class="summary-row">
-                        <span>Сумма заказа:</span>
+                        <span data-i18n="cart.subtotal">Сумма заказа:</span>
                         <span id="subtotal">0₽</span>
                     </div>
                     <div class="summary-row">
-                        <span>Доставка:</span>
+                        <span data-i18n="cart.delivery">Доставка:</span>
                         <span id="delivery-cost">200₽</span>
                     </div>
                     <div class="summary-row total">
-                        <span>Итого:</span>
+                        <span data-i18n="cart.total">Итого:</span>
                         <span id="total">0₽</span>
                     </div>
-                    <button id="checkout-btn" class="checkout-btn">Оформить заказ</button>
+                    <button id="checkout-btn" class="checkout-btn" data-i18n="cart.checkout">Оформить заказ</button>
                 </div>
                 <div id="cart-empty" class="cart-empty">
                     <div class="empty-icon">🛒</div>
-                    <h3>Корзина пуста</h3>
-                    <p>Добавьте блюда из меню</p>
-                    <button class="nav-to-menu">Перейти к меню</button>
+                    <h3 data-i18n="cart.empty">Корзина пуста</h3>
+                    <p data-i18n="cart.emptyText">Добавьте блюда из меню</p>
+                    <button class="nav-to-menu" data-i18n="nav.menu">Перейти к меню</button>
                 </div>
             </div>
 
             <!-- Orders Page -->
             <div id="orders-page" class="page">
-                <h2>Мои заказы</h2>
+                <h2 data-i18n="orders.title">Мои заказы</h2>
                 <div id="orders-list" class="orders-list">
                     <!-- Orders will be loaded here -->
                 </div>
                 <div id="orders-empty" class="orders-empty">
                     <div class="empty-icon">📦</div>
-                    <h3>Заказов пока нет</h3>
-                    <p>Сделайте первый заказ из нашего меню</p>
+                    <h3 data-i18n="orders.empty">Заказов пока нет</h3>
+                    <p data-i18n="orders.emptyText">Сделайте первый заказ из нашего меню</p>
                 </div>
             </div>
         </main>
@@ -104,49 +114,49 @@
         <div id="order-modal" class="modal hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>Оформление заказа</h3>
+                    <h3 data-i18n="checkout.title">Оформление заказа</h3>
                     <button class="modal-close">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Способ оплаты</label>
+                        <label data-i18n="checkout.payment">Способ оплаты</label>
                         <div>
                             <label style="margin-right:12px;">
                                 <input type="radio" name="payment" id="payment-cash" value="cash" checked>
-                                Наличные
+                                <span data-i18n="checkout.cash">Наличные</span>
                             </label>
                             <label>
                                 <input type="radio" name="payment" id="payment-card" value="card">
-                                Карта
+                                <span data-i18n="checkout.card">Карта</span>
                             </label>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Номер телефона (необязательно)</label>
-                        <input type="tel" id="phone-input" placeholder="+79092288988 или +381123456789">
+                        <label data-i18n="checkout.phone">Номер телефона (необязательно)</label>
+                        <input type="tel" id="phone-input" data-i18n-placeholder="checkout.phonePlaceholder" placeholder="+79092288988 или +381123456789">
                     </div>
                     <div class="form-group">
-                        <label>Адрес доставки</label>
-                        <input type="text" id="address-input" placeholder="Начните вводить улицу...">
-                        <button id="get-location" class="location-btn">📍 Определить местоположение</button>
+                        <label data-i18n="checkout.address">Адрес доставки</label>
+                        <input type="text" id="address-input" data-i18n-placeholder="checkout.addressPlaceholder" placeholder="Начните вводить улицу...">
+                        <button id="get-location" class="location-btn" data-i18n="checkout.useLocation">📍 Определить местоположение</button>
                         <div class="address-details" style="display:flex;gap:12px;margin-top:8px;">
                             <div style="flex:1;">
-                                <label style="font-size:12px;color:var(--tg-theme-hint-color);">Дом</label>
-                                <input type="text" id="house-input" placeholder="№ дома" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;font-size:14px;">
+                                <label style="font-size:12px;color:var(--tg-theme-hint-color);" data-i18n="checkout.house">Дом</label>
+                                <input type="text" id="house-input" data-i18n-placeholder="checkout.housePlaceholder" placeholder="№ дома" style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;font-size:14px;">
                             </div>
                             <div style="flex:1;">
-                                <label style="font-size:12px;color:var(--tg-theme-hint-color);">Квартира</label>
-                                <input type="text" id="apartment-input" placeholder="№ кв." style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;font-size:14px;">
+                                <label style="font-size:12px;color:var(--tg-theme-hint-color);" data-i18n="checkout.apartment">Квартира</label>
+                                <input type="text" id="apartment-input" data-i18n-placeholder="checkout.apartmentPlaceholder" placeholder="№ кв." style="width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;font-size:14px;">
                             </div>
                         </div>
                         <div id="zone-warning" style="display:none;color:var(--warning-color);margin-top:8px;">
-                            Адрес вне зоны доставки. Вы можете продолжить в список ожидания.
+                            <span data-i18n="address.outOfZone">Адрес вне зоны доставки. Вы можете продолжить в список ожидания.</span>
                         </div>
-                        <button id="waitlist-btn" style="display:none;margin-top:8px;" class="clear-btn">В список ожидания</button>
+                        <button id="waitlist-btn" style="display:none;margin-top:8px;" class="clear-btn" data-i18n="checkout.waitlist">В список ожидания</button>
                     </div>
                     <div class="form-group">
-                        <label>Комментарий к заказу</label>
-                        <textarea id="notes-input" placeholder="Дополнительные пожелания (необязательно)"></textarea>
+                        <label data-i18n="checkout.notes">Комментарий к заказу</label>
+                        <textarea id="notes-input" data-i18n-placeholder="checkout.notesPlaceholder" placeholder="Дополнительные пожелания (необязательно)"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

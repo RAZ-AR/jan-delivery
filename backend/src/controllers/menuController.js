@@ -4,7 +4,8 @@ const menuController = {
   // Получить все блюда
   async getMenu(req, res) {
     try {
-      const allItems = await menuService.getAllItems();
+      const { lang = 'ru' } = req.query; // Язык по умолчанию - русский
+      const allItems = await menuService.getAllItems(lang);
       // Фильтруем только доступные блюда с названиями
       const menu = allItems.filter(item => item.available && item.name && item.name.trim() !== '');
       res.json({
@@ -24,7 +25,8 @@ const menuController = {
   async getMenuItem(req, res) {
     try {
       const { id } = req.params;
-      const item = await menuService.getItemById(id);
+      const { lang = 'ru' } = req.query;
+      const item = await menuService.getItemById(id, lang);
       
       if (!item) {
         return res.status(404).json({
@@ -50,7 +52,8 @@ const menuController = {
   async getMenuByCategory(req, res) {
     try {
       const { category } = req.params;
-      const items = await menuService.getItemsByCategory(category);
+      const { lang = 'ru' } = req.query;
+      const items = await menuService.getItemsByCategory(category, lang);
       
       res.json({
         success: true,

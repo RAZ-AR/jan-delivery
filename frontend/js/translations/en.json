@@ -1,0 +1,127 @@
+{
+  "app": {
+    "title": "JAN Delivery",
+    "loading": "Loading delicious menu...",
+    "error": "Loading error"
+  },
+  "nav": {
+    "menu": "🍽️ Menu",
+    "cart": "🛒 Cart",
+    "orders": "📦 Orders"
+  },
+  "header": {
+    "title": "JAN Delivery",
+    "welcome": "Welcome"
+  },
+  "menu": {
+    "title": "Our menu",
+    "categories": {
+      "all": "All",
+      "shashlik": "Shashlik",
+      "kebab": "Kebab",
+      "fish": "Fish",
+      "vegetables": "Vegetables",
+      "sauces": "Sauces",
+      "salads": "Salads"
+    },
+    "search": "Search dishes...",
+    "noResults": "No dishes found",
+    "addToCart": "Add to Cart",
+    "price": "Price",
+    "weight": "Weight",
+    "calories": "Calories"
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Cart is empty",
+    "emptyText": "Add something delicious from our menu!",
+    "total": "Total",
+    "subtotal": "Subtotal:",
+    "delivery": "Delivery:",
+    "checkout": "Checkout",
+    "clear": "Clear",
+    "remove": "Remove",
+    "quantity": "Quantity",
+    "increase": "Increase quantity",
+    "decrease": "Decrease quantity"
+  },
+  "orders": {
+    "title": "Your orders",
+    "empty": "You have no orders yet",
+    "emptyText": "Your orders will appear here",
+    "status": {
+      "pending": "Awaiting confirmation",
+      "confirmed": "Confirmed",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "delivering": "Delivering",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "orderNumber": "Order #{{number}}",
+    "orderTime": "Order time",
+    "deliveryAddress": "Delivery address",
+    "items": "Items",
+    "totalAmount": "Total amount"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "deliveryInfo": "Delivery information",
+    "address": "Delivery address",
+    "addressPlaceholder": "Enter your address",
+    "street": "Street",
+    "streetPlaceholder": "Street name",
+    "house": "House",
+    "housePlaceholder": "House number",
+    "apartment": "Apartment",
+    "apartmentPlaceholder": "Apartment number",
+    "phone": "Phone number",
+    "phonePlaceholder": "Your phone",
+    "notes": "Order notes",
+    "notesPlaceholder": "Additional requests...",
+    "useLocation": "📍 Use location",
+    "total": "Total",
+    "placeOrder": "Place Order",
+    "cancel": "Cancel",
+    "required": "Required field",
+    "invalidPhone": "Invalid phone format",
+    "payment": "Payment method",
+    "cash": "Cash",
+    "card": "Card",
+    "waitlist": "Join waitlist"
+  },
+  "address": {
+    "detecting": "Detecting your address...",
+    "detected": "Address detected",
+    "failed": "Failed to detect address",
+    "outOfZone": "Address outside delivery zone",
+    "inZone": "Address in delivery zone"
+  },
+  "language": {
+    "title": "Language",
+    "select": "Select language",
+    "russian": "Русский",
+    "english": "English",
+    "serbian": "Српски"
+  },
+  "buttons": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close"
+  },
+  "messages": {
+    "success": "Success!",
+    "error": "Error!",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "orderPlaced": "Order placed!",
+    "orderPlacedText": "We will contact you for confirmation",
+    "networkError": "Network error. Check your connection.",
+    "tryAgain": "Try again"
+  }
+}

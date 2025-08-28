@@ -11,6 +11,9 @@ class App {
     utils.log('Инициализация приложения...');
 
     try {
+      // Инициализация i18n
+      await window.i18n.init();
+      
       // Ждем готовности Telegram WebApp
       await this.waitForTelegram();
       
@@ -82,6 +85,22 @@ class App {
         telegram.hapticFeedback('selection');
         this.showPage(e.target.dataset.page);
       }
+    });
+
+    // Переключатель языков
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('language-btn')) {
+        telegram.hapticFeedback('selection');
+        const lang = e.target.dataset.lang;
+        if (lang) {
+          window.i18n.setLanguage(lang);
+        }
+      }
+    });
+
+    // Слушаем изменения языка для обновления динамического контента
+    window.addEventListener('languageChanged', (e) => {
+      this.updateDynamicContent(e.detail.language);
     });
 
     // Обработка ошибок
@@ -317,6 +336,41 @@ class App {
     
     // Закрыть приложение
     telegram.close();
+  }
+
+  // Обновление динамического контента при смене языка
+  updateDynamicContent(language) {
+    // Обновляем категории меню
+    if (window.menuManager) {
+      window.menuManager.updateCategoryButtons();
+    }
+
+    // Обновляем форматирование валют
+    const priceElements = document.querySelectorAll('[data-price]');
+    priceElements.forEach(el => {
+      const price = el.dataset.price;
+      if (price) {
+        el.textContent = window.i18n.formatCurrency(parseFloat(price));
+      }
+    });
+
+    // Обновляем форматирование дат
+    const dateElements = document.querySelectorAll('[data-date]');
+    dateElements.forEach(el => {
+      const timestamp = el.dataset.date;
+      if (timestamp) {
+        const date = new Date(parseInt(timestamp));
+        el.textContent = window.i18n.formatDateTime(date);
+      }
+    });
+
+    // Обновляем placeholder в поисковой строке
+    const searchInput = document.querySelector('#search-input');
+    if (searchInput) {
+      searchInput.placeholder = window.i18n.t('menu.search');
+    }
+
+    console.log(`UI обновлен для языка: ${language}`);
   }
 }
 
