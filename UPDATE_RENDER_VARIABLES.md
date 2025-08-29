@@ -5,12 +5,19 @@
 GOOGLE_SHEETS_ID=1TOHGRsYeoG0oo2ywJ2G9DJhb7mmcSxJvLBsiEiMIYIs
 ```
 
+## Исправление WebApp URL для Telegram бота
+```
+WEB_APP_URL=https://raz-ar.github.io/jan-delivery/frontend/working.html
+```
+
 ## Инструкция обновления
 
 1. Перейти в Render Dashboard: https://render.com/
 2. Найти сервис "jan-delivery-backend"
 3. Перейти в Environment
-4. Обновить переменную `GOOGLE_SHEETS_ID` на новое значение: `1TOHGRsYeoG0oo2ywJ2G9DJhb7mmcSxJvLBsiEiMIYIs`
+4. Обновить переменные:
+   - `GOOGLE_SHEETS_ID` = `1TOHGRsYeoG0oo2ywJ2G9DJhb7mmcSxJvLBsiEiMIYIs`
+   - `WEB_APP_URL` = `https://raz-ar.github.io/jan-delivery/frontend/working.html`
 5. Нажать "Save Changes"
 6. Дождаться автоматического redeploy
 
