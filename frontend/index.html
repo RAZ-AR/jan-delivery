@@ -282,7 +282,19 @@
         const userId = tgUser?.id || 'demo_user_' + Date.now();
         
         try {
-            const response = await fetch(`${API_BASE}/api/orders/user/${userId}`);
+            // Получаем Telegram initData для аутентификации
+            const initData = window.Telegram?.WebApp?.initData || '';
+            
+            const headers = {};
+            
+            // Добавляем Telegram initData если доступен
+            if (initData) {
+                headers['X-Telegram-Init-Data'] = initData;
+            }
+            
+            const response = await fetch(`${API_BASE}/api/orders/user/${userId}`, {
+                headers: headers
+            });
             
             if (response.ok) {
                 const result = await response.json();
@@ -585,9 +597,26 @@
         try {
             console.log('Отправляем заказ:', orderData);
             
+            // Получаем Telegram initData для аутентификации
+            const initData = window.Telegram?.WebApp?.initData || '';
+            console.log('Telegram initData доступен:', !!initData);
+            console.log('Telegram WebApp объект:', !!window.Telegram?.WebApp);
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // Добавляем Telegram initData если доступен
+            if (initData) {
+                headers['X-Telegram-Init-Data'] = initData;
+                console.log('Добавлен заголовок X-Telegram-Init-Data');
+            } else {
+                console.warn('⚠️ Telegram initData недоступен - может не работать в production');
+            }
+            
             const response = await fetch(`${API_BASE}/api/orders`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify(orderData)
             });
             
@@ -604,6 +633,10 @@
                 updateCartCounter();
                 renderCart();
                 showPage('orders');
+            } else if (response.status === 401) {
+                // Ошибка аутентификации - возможно тестируем в браузере
+                showToast('⚠️ Заказ только из Telegram бота', 'error');
+                console.error('Аутентификация не прошла:', result);
             } else {
                 throw new Error(result.error || 'Неизвестная ошибка');
             }
