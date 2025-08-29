@@ -269,7 +269,104 @@
         document.querySelectorAll('.page').forEach(page => 
             page.classList.toggle('active', page.id === `${pageName}-page`));
         
-        if (pageName === 'cart') renderCart();
+        if (pageName === 'cart') {
+            renderCart();
+        } else if (pageName === 'orders') {
+            loadOrders();
+        }
+    }
+
+    // Загрузка заказов пользователя
+    async function loadOrders() {
+        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+        const userId = tgUser?.id || 'demo_user_' + Date.now();
+        
+        try {
+            const response = await fetch(`${API_BASE}/api/orders/user/${userId}`);
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && result.data.length > 0) {
+                    renderOrders(result.data);
+                } else {
+                    showEmptyOrders();
+                }
+            } else {
+                showEmptyOrders();
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки заказов:', error);
+            showEmptyOrders();
+        }
+    }
+
+    function renderOrders(orders) {
+        const ordersPage = document.getElementById('orders-page');
+        ordersPage.innerHTML = `
+            <h2>Мои заказы</h2>
+            <div class="orders-list">
+                ${orders.map(order => `
+                    <div class="order-item" style="background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #eee;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4>Заказ #${order.id}</h4>
+                            <span style="padding: 4px 8px; background: ${getStatusColor(order.status)}; color: white; border-radius: 12px; font-size: 12px;">
+                                ${getStatusText(order.status)}
+                            </span>
+                        </div>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 8px;">
+                            📅 ${new Date(order.createdAt).toLocaleDateString('ru-RU')}
+                        </p>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 8px;">
+                            📍 ${order.address || 'Адрес не указан'}
+                        </p>
+                        <p style="font-weight: 600; color: var(--tg-theme-button-color, #0088cc);">
+                            💰 ${order.total || 0} RSD
+                        </p>
+                        <div style="margin-top: 10px; font-size: 13px; color: #999;">
+                            ${order.items ? `Товаров: ${order.items.length}` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function showEmptyOrders() {
+        const ordersPage = document.getElementById('orders-page');
+        ordersPage.innerHTML = `
+            <h2>Мои заказы</h2>
+            <div class="orders-empty">
+                <div class="empty-icon">📦</div>
+                <h3>Заказов пока нет</h3>
+                <p>Сделайте первый заказ из нашего меню</p>
+            </div>
+        `;
+    }
+
+    function getStatusColor(status) {
+        const colors = {
+            'pending': '#ffa500',
+            'confirmed': '#0088cc', 
+            'cooking': '#ff6b35',
+            'ready': '#28a745',
+            'delivering': '#17a2b8',
+            'delivered': '#28a745',
+            'cancelled': '#dc3545'
+        };
+        return colors[status] || '#6c757d';
+    }
+
+    function getStatusText(status) {
+        const texts = {
+            'pending': 'Ожидает',
+            'confirmed': 'Подтвержден',
+            'cooking': 'Готовится',
+            'ready': 'Готов',
+            'delivering': 'В пути',
+            'delivered': 'Доставлен',
+            'cancelled': 'Отменен'
+        };
+        return texts[status] || status;
     }
 
     async function switchLanguage(lang) {
@@ -466,28 +563,52 @@
         
         showToast('Оформляем заказ...', 'info');
         
+        // Получаем данные пользователя из Telegram
+        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+        const userId = tgUser?.id || 'demo_user_' + Date.now();
+        
         const orderData = {
+            userId: userId,
             items: cart,
-            total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + 200
+            total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + 200,
+            address: 'Белград, центр', // Можно добавить форму адреса позже
+            phone: tgUser?.username || '',
+            userInfo: {
+                first_name: tgUser?.first_name || '',
+                last_name: tgUser?.last_name || '',
+                username: tgUser?.username || ''
+            },
+            payment_method: 'cash',
+            notes: ''
         };
         
         try {
+            console.log('Отправляем заказ:', orderData);
+            
             const response = await fetch(`${API_BASE}/api/orders`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
             });
             
-            if (response.ok) {
-                showToast('Заказ оформлен!', 'success');
+            const result = await response.json();
+            console.log('Ответ API:', result);
+            
+            if (response.ok && result.success) {
+                if (result.data.waitlisted) {
+                    showToast('Заказ в очереди (зона доставки)', 'info');
+                } else {
+                    showToast('Заказ оформлен! ID: ' + result.data.id, 'success');
+                }
                 cart = [];
                 updateCartCounter();
                 renderCart();
                 showPage('orders');
             } else {
-                throw new Error('Ошибка заказа');
+                throw new Error(result.error || 'Неизвестная ошибка');
             }
         } catch (error) {
+            console.error('Ошибка заказа:', error);
             showToast('Ошибка: ' + error.message, 'error');
         }
     }
