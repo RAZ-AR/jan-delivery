@@ -157,6 +157,30 @@ const menuController = {
         }
       });
     }
+  },
+
+  // Debug информация о боте
+  async getBotDebugInfo(req, res) {
+    try {
+      res.json({
+        success: true,
+        botDebug: {
+          webAppUrl: process.env.WEB_APP_URL,
+          webhookUrl: process.env.TELEGRAM_WEBHOOK_URL,
+          botToken: process.env.TELEGRAM_BOT_TOKEN ? '***SET***' : '***NOT SET***',
+          groupChatId: process.env.TELEGRAM_GROUP_CHAT_ID,
+          expectedWebAppUrl: 'https://raz-ar.github.io/jan-delivery/frontend/index.html',
+          workingUrl: 'https://raz-ar.github.io/jan-delivery/frontend/working.html',
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Ошибка при получении bot debug информации:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка bot debug информации'
+      });
+    }
   }
 };
 

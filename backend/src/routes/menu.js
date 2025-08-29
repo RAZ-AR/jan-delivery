@@ -20,6 +20,9 @@ router.get('/subcategory/:subCategory', menuController.getMenuBySubCategory);
 // GET /api/menu/debug - debug информация о таблице
 router.get('/debug', menuController.getDebugInfo);
 
+// GET /api/menu/bot-debug - debug информации о боте
+router.get('/bot-debug', menuController.getBotDebugInfo);
+
 // GET /api/menu/:id - получить блюдо по ID (должно быть последним)
 router.get('/:id', menuController.getMenuItem);
 
